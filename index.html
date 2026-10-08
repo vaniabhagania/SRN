@@ -658,9 +658,17 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     { id: "neha",   name: "Neha",   phone: "919962506977" }
   ];
 
-  /* The complexes SRN delivers to. Add or rename freely. */
-  var TOWERS = ["Sumadhura Nandanam", "Olive", "Gopalan", "Raja Ritz",
-                "HEH", "GG", "Five Summit", "Somewhere else"];
+  /* The complexes SRN delivers to. Add or rename freely — "Somewhere else"
+     is added automatically at the end and asks the customer to type a name. */
+  var TOWERS = [
+    "Habitat Eden Heights",
+    "Gopalan Grandeur",
+    "Olive apartment",
+    "Raja Ritz",
+    "The Five Summits Address",
+    "Sumadhura Nandanam",
+    "Sumadhura Srinivasam"
+  ];
 
   var DELIVERY_NOTE = "Delivery charges are applicable, and to be paid at Delivery receive.";
   var SLOTS = [
@@ -1237,7 +1245,14 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
       '<option value="">Choose one…</option>' +
       TOWERS.map(function (t) {
         return '<option value="' + esc(t) + '"' + (s.tower === t ? " selected" : "") + ">" + esc(t) + "</option>";
-      }).join("") + "</select></div>" +
+      }).join("") +
+      '<option value="__other__"' + (s.tower && TOWERS.indexOf(s.tower) < 0 ? " selected" : "") +
+      ">Somewhere else</option></select></div>" +
+      '<div class="field" id="otherWrap"' +
+      (s.tower && TOWERS.indexOf(s.tower) < 0 ? "" : " hidden") + ">" +
+      '<label for="cOther">Name of your apartment</label>' +
+      '<input type="text" id="cOther" maxlength="60" placeholder="Which building are we coming to?" value="' +
+      (s.tower && TOWERS.indexOf(s.tower) < 0 ? esc(s.tower) : "") + '"></div>' +
       '<div class="field"><label for="cFlat">Flat / house number</label>' +
       '<input type="text" id="cFlat" maxlength="24" placeholder="e.g. 2104, or B-605" value="' + esc(s.flat) + '" required>' +
       '<span class="hint">This is what the kitchen uses to find you.</span></div>' +
@@ -1811,11 +1826,16 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
       e.preventDefault();
       var phone = $("#cPhone").value.replace(/\D/g, "").replace(/^0+/, "").replace(/^91(?=\d{10}$)/, "");
       if (phone.length !== 10) { $("#phoneErr").hidden = false; return; }
-      if (!$("#cTower").value) { toast("Choose your apartment or complex."); return; }
+      var tower = $("#cTower").value;
+      if (!tower) { toast("Choose your apartment or complex."); return; }
+      if (tower === "__other__") {
+        tower = ($("#cOther").value || "").trim().slice(0, 60);
+        if (!tower) { toast("Type the name of your apartment."); $("#cOther").focus(); return; }
+      }
       placeOrder({
         customer_name: $("#cName").value.trim().slice(0, 60),
         phone: phone,
-        tower: $("#cTower").value,
+        tower: tower,
         flat: $("#cFlat").value.trim().slice(0, 24),
         note: $("#cNote").value.trim().slice(0, 200)
       });
@@ -1835,6 +1855,15 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
   });
 
   document.addEventListener("change", function (e) {
+    if (e.target.id === "cTower") {
+      var other = e.target.value === "__other__";
+      var wrap = $("#otherWrap");
+      if (wrap) {
+        wrap.hidden = !other;
+        if (other) $("#cOther").focus();
+      }
+      return;
+    }
     if (e.target.id === "openToggle") {
       var c = me(); if (!c) return;
       var open = e.target.checked;
