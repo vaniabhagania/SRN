@@ -648,8 +648,8 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
      this device only, which is fine for trying it out.
      ============================================================ */
   var CFG = {
-    SUPABASE_URL: "",
-    SUPABASE_ANON_KEY: ""
+    SUPABASE_URL: "https://xaawulloreqdfpbzcket.supabase.co",
+    SUPABASE_ANON_KEY: "sb_publishable_q5-8XsV_3jJ7RK2hTlYPLA_lUb74S1T"
   };
 
   var CHEFS = [
@@ -743,7 +743,7 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
         }
         return Promise.resolve();
       }
-      return loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js")
+      return loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js")
         .then(function () {
           self.sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
           self.mode = "supabase";

@@ -20,11 +20,12 @@ Live at **https://vaniabhagania.github.io/SRN/**
 
 ---
 
-## Going live — about ten minutes
+## Going live
 
-Until you do this, the app works but keeps everything on one device: a dish
-Shobha posts on her phone won't reach a customer's. These steps give all three
-chefs and every customer the same live data.
+The app is already pointed at its Supabase project — `CFG` at the top of the
+`<script>` in `index.html` holds the project URL and publishable key. The steps
+below are what that project needs to contain, kept here for when you rebuild it
+or hand it to someone else.
 
 **1. Make a Supabase project.** [supabase.com](https://supabase.com) → new
 project. The free tier is enough. Pick a region near Bengaluru (Mumbai or
@@ -57,22 +58,26 @@ update chefs set auth_uid = '<UID for neha>'   where id = 'neha';
 **4. Make a place for dish photos.** Storage → New bucket → name it
 `dish-photos` → tick **Public bucket**.
 
-**5. Point the app at it.** Settings → API gives you a Project URL and an
-`anon` `public` key. Put both into the top of the `<script>` in `index.html`:
+**5. Point the app at it.** Settings → API gives you a Project URL and a
+**publishable** key (`sb_publishable_…`, or `anon` `public` on older projects).
+Put both into the top of the `<script>` in `index.html`:
 
 ```js
 var CFG = {
   SUPABASE_URL: "https://xxxxxxxxxxxx.supabase.co",
-  SUPABASE_ANON_KEY: "eyJhbGciOi..."
+  SUPABASE_ANON_KEY: "sb_publishable_..."
 };
 ```
 
 Commit and push. GitHub Pages redeploys in a minute or two.
 
-The anon key is *meant* to be public — it identifies the project, it doesn't
-grant anything. What protects your data is the security rules in `schema.sql`:
-anyone may read the menu and place an order, but only a signed-in chef can post
-dishes or read a customer's name, phone and flat number.
+The publishable key is *meant* to be public — it identifies the project and
+grants nothing on its own. What protects your data is the security rules in
+`schema.sql`: anyone may read the menu and place an order, but only a signed-in
+chef can post dishes or read a customer's name, phone and flat number.
+
+Never put the **secret** key (`sb_secret_…`, or `service_role`) in this file.
+It bypasses every one of those rules.
 
 ---
 
