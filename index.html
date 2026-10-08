@@ -161,12 +161,12 @@ button{ cursor:pointer; background:none; border:none; padding:0 }
 /* ---------- stepper / buttons ---------- */
 .stepper{ display:flex; align-items:center; gap:2px; background:var(--surface-2); border:1px solid var(--line); border-radius:999px; padding:2px }
 .stepper button{ width:32px; height:32px; display:grid; place-items:center; border-radius:50%; font-size:19px; line-height:1; color:var(--ink) }
-.stepper button:disabled{ opacity:.3 }
 .stepper .qty{ min-width:26px; text-align:center; font-weight:700; font-size:15px }
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
   padding:11px 18px; border-radius:999px; font-weight:600; font-size:15px;
   background:var(--brand); color:var(--on-brand); border:1px solid var(--brand); min-height:44px;
+  text-decoration:none;
 }
 .btn.ghost{ background:var(--surface); color:var(--ink); border-color:var(--line-strong) }
 .btn.accent{ background:var(--accent); border-color:var(--accent); color:var(--on-accent) }
@@ -187,6 +187,7 @@ button{ cursor:pointer; background:none; border:none; padding:0 }
 }
 .note svg{ width:17px; height:17px; flex:none; margin-top:1px }
 .note.plain{ background:var(--surface-2); color:var(--ink-soft) }
+.note.warn{ background:var(--warn-soft); color:var(--warn) }
 
 /* ---------- cart bar ---------- */
 .cartbar{
@@ -259,11 +260,11 @@ button{ cursor:pointer; background:none; border:none; padding:0 }
 .field{ display:flex; flex-direction:column; gap:5px; margin-bottom:13px }
 .field label{ font-size:12.5px; font-weight:600; color:var(--ink-soft); letter-spacing:.02em }
 .field .hint{ font-size:12px; color:var(--ink-faint) }
-input[type=text],input[type=tel],input[type=number],input[type=password],textarea,select{
+input[type=text],input[type=tel],input[type=number],input[type=password],input[type=date],textarea,select{
   width:100%; padding:11px 13px; border-radius:var(--radius-sm);
   border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); font-size:16px;
 }
-textarea{ resize:vertical; min-height:76px; line-height:1.5 }
+textarea{ resize:vertical; min-height:70px; line-height:1.5 }
 input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent) }
 .err{ color:var(--nonveg); font-size:12.5px; font-weight:600 }
 .row2{ display:flex; gap:10px }
@@ -322,8 +323,8 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
 .switch input::after{ content:""; position:absolute; top:3px; left:3px; width:19px; height:19px; border-radius:50%; background:#FFFDF8; transition:transform .15s }
 .switch input:checked{ background:var(--ok) }
 .switch input:checked::after{ transform:translateX(17px) }
-.subtabs{ display:flex; gap:5px; margin-bottom:16px; background:var(--surface-2); padding:4px; border-radius:11px }
-.subtabs button{ flex:1; padding:8px 4px; border-radius:8px; font-size:13.5px; font-weight:600; color:var(--ink-soft) }
+.subtabs{ display:flex; gap:4px; margin-bottom:16px; background:var(--surface-2); padding:4px; border-radius:11px }
+.subtabs button{ flex:1; padding:8px 3px; border-radius:8px; font-size:12.5px; font-weight:600; color:var(--ink-soft) }
 .subtabs button[aria-selected="true"]{ background:var(--surface); color:var(--ink); box-shadow:var(--shadow) }
 .adish{ display:flex; gap:11px; padding:12px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); margin-bottom:10px }
 .adish .m{ flex:1; min-width:0 }
@@ -341,6 +342,49 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
 .order ul{ margin:7px 0; padding-left:17px; font-size:14px; color:var(--ink-soft) }
 .order .addr{ font-size:13.5px; color:var(--ink-soft); line-height:1.5 }
 
+/* ---------- earnings calendar ---------- */
+.calbar{ display:flex; align-items:center; gap:10px; margin-bottom:12px }
+.calbar h3{ flex:1; font-size:18px; text-align:center; letter-spacing:.02em }
+.calnav{ width:36px; height:36px; display:grid; place-items:center; border-radius:50%; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft) }
+.calnav svg{ width:16px; height:16px }
+.calnav:disabled{ opacity:.3 }
+.monthtotal{
+  display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  padding:13px 15px; border-radius:var(--radius); margin-bottom:14px;
+  background:var(--brand); color:var(--on-brand);
+}
+.monthtotal .lbl{ font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; opacity:.78 }
+.monthtotal .val{ font-family:var(--font-display); font-size:26px }
+.dow{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:4px }
+.dow span{ text-align:center; font-size:10.5px; font-weight:700; letter-spacing:.06em; color:var(--ink-faint); text-transform:uppercase }
+.cal{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:20px }
+.cal .pad{ aspect-ratio:1 }
+.cal button{
+  aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;
+  border:1px solid var(--line); border-radius:9px; background:var(--surface);
+  font-size:13px; color:var(--ink-soft); padding:2px; min-width:0;
+}
+.cal button .dd{ font-weight:600; font-size:13px; line-height:1 }
+.cal button .amt{ font-size:9.5px; font-weight:700; color:var(--accent-ink); line-height:1.1; white-space:nowrap }
+.cal button.earned{ background:var(--accent-soft); border-color:var(--accent-soft) }
+.cal button.today{ border-color:var(--accent); border-width:1.5px }
+.cal button[aria-pressed="true"]{ background:var(--brand); border-color:var(--brand); color:var(--on-brand) }
+.cal button[aria-pressed="true"] .amt{ color:var(--on-brand) }
+.cal button:disabled{ opacity:.35 }
+.dayhead{
+  display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  padding-bottom:9px; border-bottom:2px solid var(--line-strong); margin-bottom:14px;
+}
+.dayhead h4{ margin:0; font-family:var(--font-display); font-size:17px; font-weight:400 }
+.dayhead .tot{ font-size:21px; font-weight:700 }
+.dayorder{ padding:12px 0; border-bottom:1px solid var(--line) }
+.dayorder:last-child{ border-bottom:none }
+.dayorder-head{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:5px }
+.dayorder-head strong{ font-size:15px }
+.dayorder-head .where{ font-size:12.5px; color:var(--ink-faint) }
+.dayorder-head .amt{ margin-left:auto; font-weight:700; font-size:15px }
+.dayorder ul{ margin:4px 0 0; padding-left:16px; font-size:13.5px; color:var(--ink-soft); line-height:1.6 }
+
 /* ---------- misc ---------- */
 .toast{
   position:fixed; left:16px; right:16px; bottom:calc(140px + env(safe-area-inset-bottom,0px)); z-index:80;
@@ -352,7 +396,6 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
 @media (prefers-reduced-motion:reduce){ .skeleton{ animation:none } }
 .divider{ height:1px; background:var(--line); margin:20px 0 }
 .center{ text-align:center }
-.stack{ display:flex; flex-direction:column; gap:11px }
 </style>
 
 <div class="topbar">
@@ -432,10 +475,11 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
         <div class="chefpick" id="chefPick"></div>
         <div class="field">
           <label for="pinInput">PIN</label>
-          <input type="password" id="pinInput" inputmode="numeric" autocomplete="off" placeholder="••••">
-          <span class="err" id="pinErr" hidden>That PIN doesn't match. Try again.</span>
+          <input type="password" id="pinInput" inputmode="numeric" autocomplete="current-password" placeholder="••••••">
+          <span class="err" id="pinErr" hidden></span>
         </div>
         <button class="btn full" id="loginBtn">Sign in</button>
+        <p class="muted" style="font-size:12.5px;margin-top:12px" id="loginNote"></p>
       </div>
     </div>
 
@@ -453,9 +497,10 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
       </div>
 
       <div class="subtabs" role="tablist">
-        <button role="tab" data-sub="dishes" aria-selected="true">My dishes</button>
-        <button role="tab" data-sub="add" aria-selected="false">Add dish</button>
+        <button role="tab" data-sub="dishes" aria-selected="true">Dishes</button>
+        <button role="tab" data-sub="add" aria-selected="false">Add</button>
         <button role="tab" data-sub="orders" aria-selected="false">Orders</button>
+        <button role="tab" data-sub="earn" aria-selected="false">Earnings</button>
       </div>
 
       <div id="sub-dishes">
@@ -466,16 +511,16 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
         <form id="dishForm" autocomplete="off">
           <div class="field">
             <label for="dName">Dish name</label>
-            <input type="text" id="dName" maxlength="70" placeholder="Bisi bele bath" required>
+            <input type="text" id="dName" maxlength="70" placeholder="Chicken Biryani" required>
           </div>
           <div class="field">
             <label for="dNote">Short description <span class="hint">(optional)</span></label>
-            <input type="text" id="dNote" maxlength="110" placeholder="With ghee, boondi and raita">
+            <input type="text" id="dNote" maxlength="110" placeholder="With raita and salan">
           </div>
           <div class="row2">
             <div class="field">
               <label for="dPrice">Price (₹)</label>
-              <input type="number" id="dPrice" min="1" max="99999" step="1" inputmode="numeric" placeholder="120" required>
+              <input type="number" id="dPrice" min="1" max="99999" step="1" inputmode="numeric" placeholder="180" required>
             </div>
             <div class="field">
               <label for="dSlot">Available for</label>
@@ -497,7 +542,7 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
           <div class="field">
             <label for="dChef">Cooked by</label>
             <input type="text" id="dChef" maxlength="40" placeholder="Your name">
-            <span class="hint">Shown on the dish. Defaults to your name, edit it for anything you cooked together.</span>
+            <span class="hint">Shown on the dish. Defaults to your name — change it for anything cooked together.</span>
           </div>
           <div class="field">
             <label>Photo <span class="hint">(optional)</span></label>
@@ -508,12 +553,39 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
             <input type="file" id="dImage" accept="image/*" hidden>
           </div>
           <button class="btn full" type="submit" id="dishSubmit">Post dish</button>
-          <p class="center muted" style="font-size:12.5px;margin-top:9px">Posted dishes show up on the customer menu straight away.</p>
+          <p class="center muted" style="font-size:12.5px;margin-top:9px">Posted dishes appear on the customer menu straight away.</p>
         </form>
       </div>
 
       <div id="sub-orders" hidden>
         <div id="orderList"></div>
+      </div>
+
+      <div id="sub-earn" hidden>
+        <div class="calbar">
+          <button class="calnav" id="calPrev" aria-label="Previous month">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <h3 id="calMonth">—</h3>
+          <button class="calnav" id="calNext" aria-label="Next month">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <div class="monthtotal">
+          <span class="lbl">Your earnings this month</span>
+          <span class="val tnum" id="monthTotal">₹0</span>
+        </div>
+
+        <div class="dow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+        <div class="cal" id="calGrid"></div>
+
+        <div id="dayPanel">
+          <p class="muted center" style="font-size:13.5px;padding:10px 0 20px">Tap a date to see what you earned and who ordered.</p>
+        </div>
+
+        <button class="btn ghost full sm" id="addManual" style="margin-bottom:8px">Add earnings for a past day</button>
+        <p class="muted" style="font-size:12px;line-height:1.5">Orders placed through the app are counted automatically. Use this for days sold before the app, or cash taken outside it.</p>
       </div>
     </div>
   </section>
@@ -569,26 +641,39 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
   "use strict";
 
   /* ============================================================
-     SRN Kitchen — config
-     Edit CHEFS to change the roster, phone numbers or default PINs.
+     SRN Kitchen
+     ------------------------------------------------------------
+     To go live, paste your Supabase project URL and anon key below
+     and run schema.sql in that project. Until then the app runs on
+     this device only, which is fine for trying it out.
      ============================================================ */
+  var CFG = {
+    SUPABASE_URL: "",
+    SUPABASE_ANON_KEY: ""
+  };
+
   var CHEFS = [
-    { id: "shobha", name: "Shobha", phone: "919800373577", pin: "1001" },
-    { id: "ramya",  name: "Ramya",  phone: "918105177446", pin: "1002" },
-    { id: "neha",   name: "Neha",   phone: "919962506977", pin: "1003" }
+    { id: "shobha", name: "Shobha", phone: "919800373577" },
+    { id: "ramya",  name: "Ramya",  phone: "918105177446" },
+    { id: "neha",   name: "Neha",   phone: "919962506977" }
   ];
+
+  /* The complexes SRN delivers to. Add or rename freely. */
+  var TOWERS = ["Sumadhura Nandanam", "Olive", "Gopalan", "Raja Ritz",
+                "HEH", "GG", "Five Summit", "Somewhere else"];
+
   var DELIVERY_NOTE = "Delivery charges are applicable, and to be paid at Delivery receive.";
   var SLOTS = [
-    { id: "any",       label: "Everything" },
-    { id: "breakfast", label: "Breakfast" },
-    { id: "lunch",     label: "Lunch" },
-    { id: "dinner",    label: "Dinner" }
+    { id: "any", label: "Everything" }, { id: "breakfast", label: "Breakfast" },
+    { id: "lunch", label: "Lunch" },    { id: "dinner", label: "Dinner" }
   ];
   var SLOT_LABEL = { all: "All day", breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner" };
   var EMOJIS = ["😋", "🔥", "❤️", "👌", "🤤", "🙏", "⭐", "🍛", "🥗", "😍"];
+  var MONTHS = ["January","February","March","April","May","June",
+                "July","August","September","October","November","December"];
 
   /* ============================================================
-     tiny helpers
+     helpers
      ============================================================ */
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
@@ -600,7 +685,16 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
   }
   var inr = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
   function money(n) { return "₹" + inr.format(Math.round(Number(n) || 0)); }
+  function shortMoney(n) {
+    n = Math.round(Number(n) || 0);
+    return n >= 1000 ? "₹" + (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + "k" : "₹" + n;
+  }
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function dayKey(d) {
+    d = (d instanceof Date) ? d : new Date(d);
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
+           "-" + String(d.getDate()).padStart(2, "0");
+  }
   function when(ts) {
     if (!ts) return "";
     var d = new Date(ts), diff = (Date.now() - d.getTime()) / 1000;
@@ -613,153 +707,327 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     var t = $("#toast");
     t.textContent = msg; t.hidden = false;
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { t.hidden = true; }, 2600);
+    toast._t = setTimeout(function () { t.hidden = true; }, 2800);
   }
   function lsGet(k, d) {
     try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }
     catch (e) { return d; }
   }
-  function lsSet(k, v) {
-    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
-  }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 
-  /* ============================================================
-     storage — Claude artifact db when available, localStorage otherwise
-     Both expose the same tiny surface so the UI never branches.
-     ============================================================ */
-  var PATHS = {
-    chefs: "chefs",
-    dishes: "dishes",
-    images: "dishimages",
-    reviews: "reviews",
-    orders: "private/inbox/orders"
-  };
-
-  var Store = {
-    mode: "local",
-    canWrite: true,
-    _db: null,
-    _subs: {},
-
-    init: function () {
-      var self = this;
-      var give = function () { return Promise.resolve(); };
-      if (!(window.claude && typeof window.claude.use === "function")) return give();
-
-      return Promise.all([
-        window.claude.use("db").catch(function () { return null; }),
-        window.claude.use("user").catch(function () { return null; })
-      ]).then(function (r) {
-        var db = r[0], user = r[1];
-        if (!db) return;
-        self._db = db;
-        self.mode = "claude";
-        if (user && typeof user.can === "function") {
-          return Promise.resolve(user.can("data.write")).then(function (ok) {
-            self.canWrite = ok !== false;   // null means "not told" — keep inputs live
-          }).catch(function () {});
-        }
-      }).catch(function () {});
-    },
-
-    /* subscribe to a collection; cb receives an array of {id, ...data} */
-    watch: function (key, cb) {
-      var path = PATHS[key], self = this;
-      if (this.mode === "claude") {
-        try {
-          return this._db.collection(path).onSnapshot(function (snap) {
-            cb(snap.docs.map(function (d) {
-              var o = Object.assign({}, d.data()); o.id = d.id; return o;
-            }));
-          }, function () { cb([]); });
-        } catch (e) { cb([]); return function () {}; }
-      }
-      var lk = "srn_" + key;
-      var emit = function () { cb(lsGet(lk, [])); };
-      emit();
-      (this._subs[key] = this._subs[key] || []).push(emit);
-      window.addEventListener("storage", function (e) { if (e.key === lk) emit(); });
-      return function () {};
-    },
-
-    put: function (key, id, data) {
-      if (this.mode === "claude") {
-        return this._db.collection(PATHS[key]).doc(id).set(data);
-      }
-      var lk = "srn_" + key, rows = lsGet(lk, []);
-      var i = rows.findIndex(function (r) { return r.id === id; });
-      var rec = Object.assign({}, data, { id: id });
-      if (i >= 0) rows[i] = rec; else rows.push(rec);
-      lsSet(lk, rows);
-      (this._subs[key] || []).forEach(function (f) { f(); });
-      return Promise.resolve();
-    },
-
-    remove: function (key, id) {
-      if (this.mode === "claude") {
-        return this._db.collection(PATHS[key]).doc(id).delete();
-      }
-      var lk = "srn_" + key;
-      lsSet(lk, lsGet(lk, []).filter(function (r) { return r.id !== id; }));
-      (this._subs[key] || []).forEach(function (f) { f(); });
-      return Promise.resolve();
-    },
-
-    getDoc: function (path) {
-      if (this.mode === "claude") {
-        return this._db.doc(path).get().then(function (s) { return s.exists ? s.data() : null; })
-          .catch(function () { return null; });
-      }
-      return Promise.resolve(lsGet("srn_doc_" + path, null));
-    },
-
-    setDoc: function (path, data) {
-      if (this.mode === "claude") return this._db.doc(path).set(data);
-      lsSet("srn_doc_" + path, data);
-      return Promise.resolve();
-    }
-  };
-
-  /* ============================================================
-     app state
-     ============================================================ */
-  var state = {
-    view: "menu",
-    slot: "any",
-    diet: "any",
-    chefs: [],
-    dishes: [],
-    images: {},
-    reviews: [],
-    orders: [],
-    cart: lsGet("srn_cart", {}),
-    session: lsGet("srn_session", null),
-    sub: "dishes",
-    loaded: false,
-    pendingImage: null,
-    newDiet: "veg",
-    reviewDraft: { rating: 0, text: "", name: "" }
-  };
-
-  function chefById(id) {
-    var c = state.chefs.filter(function (x) { return x.id === id; })[0];
-    return c || CHEFS.filter(function (x) { return x.id === id; })[0] || null;
-  }
-  function chefRoster() {
-    /* config roster, overlaid with whatever is saved */
-    return CHEFS.map(function (base) {
-      var saved = state.chefs.filter(function (x) { return x.id === base.id; })[0] || {};
-      return {
-        id: base.id,
-        phone: base.phone,
-        name: saved.name || base.name,
-        open: saved.open === undefined ? true : !!saved.open
-      };
+  function loadScript(src) {
+    return new Promise(function (res, rej) {
+      var s = document.createElement("script");
+      s.src = src; s.onload = res; s.onerror = function () { rej(new Error("load failed")); };
+      document.head.appendChild(s);
     });
   }
 
   /* ============================================================
-     veg / non-veg mark + stars
+     data layer — Supabase when configured, this device otherwise
+     ============================================================ */
+  var DB = {
+    mode: "local",
+    sb: null,
+    chefId: null,          // signed-in chef
+
+    cdb: null,             // artifact database, when running as a Claude artifact
+
+    init: function () {
+      var self = this;
+      if (!CFG.SUPABASE_URL || !CFG.SUPABASE_ANON_KEY) {
+        if (window.claude && typeof window.claude.use === "function") {
+          return window.claude.use("db").then(function (db) {
+            if (db) { self.cdb = db; self.mode = "claude"; }
+          }).catch(function () {});
+        }
+        return Promise.resolve();
+      }
+      return loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js")
+        .then(function () {
+          self.sb = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
+          self.mode = "supabase";
+          return self.sb.auth.getSession();
+        })
+        .then(function (r) {
+          var email = r && r.data && r.data.session && r.data.session.user &&
+                      r.data.session.user.email;
+          if (email) self.chefId = email.split("@")[0];
+        })
+        .catch(function () { self.mode = "local"; });
+    },
+
+    /* artifact-database helpers */
+    _cList: function (path) {
+      return this.cdb.collection(path).get().then(function (s) {
+        return s.docs.map(function (d) {
+          var o = Object.assign({}, d.data()); o.id = d.id; return o;
+        });
+      });
+    },
+    _cPut: function (path, id, data) {
+      var body = Object.assign({}, data); delete body.id;
+      return this.cdb.collection(path).doc(id).set(body);
+    },
+
+    /* ---- chefs ---- */
+    chefs: function () {
+      if (this.mode === "supabase") {
+        return this.sb.from("chefs").select("*").then(function (r) { return r.data || []; });
+      }
+      if (this.mode === "claude") {
+        return this._cList("chefs").then(function (rows) {
+          return CHEFS.map(function (c) {
+            var s = rows.filter(function (x) { return x.id === c.id; })[0] || {};
+            return { id: c.id, name: s.name || c.name, phone: c.phone,
+                     open: s.open === undefined ? true : !!s.open };
+          });
+        });
+      }
+      var saved = lsGet("srn_chefs", {});
+      return Promise.resolve(CHEFS.map(function (c) {
+        var s = saved[c.id] || {};
+        return { id: c.id, name: s.name || c.name, phone: c.phone,
+                 open: s.open === undefined ? true : !!s.open };
+      }));
+    },
+    saveChef: function (id, patch) {
+      if (this.mode === "supabase") {
+        return this.sb.from("chefs").update(patch).eq("id", id).then(thrower);
+      }
+      if (this.mode === "claude") {
+        var base = CHEFS.filter(function (c) { return c.id === id; })[0] || {};
+        return this._cPut("chefs", id, Object.assign({ name: base.name, open: true }, patch));
+      }
+      var saved = lsGet("srn_chefs", {});
+      saved[id] = Object.assign(saved[id] || {}, patch);
+      lsSet("srn_chefs", saved);
+      return Promise.resolve();
+    },
+
+    /* ---- dishes ---- */
+    dishes: function () {
+      if (this.mode === "supabase") {
+        return this.sb.from("dishes").select("*").order("created_at", { ascending: false })
+          .then(function (r) { return r.data || []; });
+      }
+      if (this.mode === "claude") {
+        return this._cList("dishes").then(function (rows) {
+          rows.sort(function (a, b) { return (b.created_at || "") < (a.created_at || "") ? -1 : 1; });
+          return rows;
+        });
+      }
+      return Promise.resolve(lsGet("srn_dishes", []));
+    },
+    saveDish: function (rec) {
+      if (this.mode === "supabase") {
+        var body = Object.assign({}, rec);
+        if (!body.id) delete body.id;
+        return this.sb.from("dishes").upsert(body).then(thrower);
+      }
+      if (this.mode === "claude") {
+        var id = rec.id || uid();
+        return this._cPut("dishes", String(id),
+          Object.assign({ created_at: rec.created_at || new Date().toISOString() }, rec));
+      }
+      var rows = lsGet("srn_dishes", []);
+      if (!rec.id) rec.id = uid();
+      var i = rows.findIndex(function (x) { return x.id === rec.id; });
+      if (i >= 0) rows[i] = Object.assign(rows[i], rec); else rows.push(rec);
+      lsSet("srn_dishes", rows);
+      return Promise.resolve();
+    },
+    deleteDish: function (id) {
+      if (this.mode === "supabase") {
+        return this.sb.from("dishes").delete().eq("id", id).then(thrower);
+      }
+      if (this.mode === "claude") {
+        return this.cdb.collection("dishes").doc(String(id)).delete();
+      }
+      lsSet("srn_dishes", lsGet("srn_dishes", []).filter(function (x) { return x.id !== id; }));
+      return Promise.resolve();
+    },
+
+    /* ---- orders ---- */
+    createOrder: function (o) {
+      if (this.mode === "supabase") {
+        return this.sb.from("orders").insert(o).then(thrower);
+      }
+      if (this.mode === "claude") {
+        /* under private/ so customer names, phones and flats stay unreadable
+           to anyone who merely has the link */
+        return this.cdb.collection("private/inbox/orders").doc(uid())
+          .set(Object.assign({ placed_at: new Date().toISOString() }, o));
+      }
+      var rows = lsGet("srn_orders", []);
+      rows.push(Object.assign({ id: uid(), placed_at: new Date().toISOString() }, o));
+      lsSet("srn_orders", rows);
+      return Promise.resolve();
+    },
+    ordersBetween: function (fromISO, toISO) {
+      if (this.mode === "supabase") {
+        return this.sb.from("orders").select("*")
+          .gte("placed_at", fromISO).lt("placed_at", toISO)
+          .order("placed_at", { ascending: false })
+          .then(function (r) { return r.data || []; });
+      }
+      if (this.mode === "claude") {
+        return this._cList("private/inbox/orders").then(function (rows) {
+          return rows.filter(function (o) {
+            return o.placed_at >= fromISO && o.placed_at < toISO;
+          }).sort(function (a, b) { return a.placed_at < b.placed_at ? 1 : -1; });
+        });
+      }
+      var rows = lsGet("srn_orders", []).filter(function (o) {
+        return o.placed_at >= fromISO && o.placed_at < toISO;
+      });
+      rows.sort(function (a, b) { return a.placed_at < b.placed_at ? 1 : -1; });
+      return Promise.resolve(rows);
+    },
+    recentOrders: function () {
+      var from = new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString();
+      return this.ordersBetween(from, new Date(Date.now() + 86400000).toISOString());
+    },
+
+    /* ---- reviews ---- */
+    reviews: function () {
+      if (this.mode === "supabase") {
+        return this.sb.from("reviews").select("*").order("created_at", { ascending: false }).limit(100)
+          .then(function (r) { return r.data || []; });
+      }
+      if (this.mode === "claude") {
+        return this._cList("reviews").then(function (rows) {
+          return rows.sort(function (a, b) { return (a.created_at || "") < (b.created_at || "") ? 1 : -1; });
+        });
+      }
+      return Promise.resolve(lsGet("srn_reviews", []));
+    },
+    createReview: function (r) {
+      if (this.mode === "supabase") {
+        return this.sb.from("reviews").insert(r).then(thrower);
+      }
+      if (this.mode === "claude") {
+        return this._cPut("reviews", uid(),
+          Object.assign({ created_at: new Date().toISOString() }, r));
+      }
+      var rows = lsGet("srn_reviews", []);
+      rows.unshift(Object.assign({ id: uid(), created_at: new Date().toISOString() }, r));
+      lsSet("srn_reviews", rows);
+      return Promise.resolve();
+    },
+
+    /* ---- manually entered earnings ---- */
+    manualBetween: function (chefId, fromDay, toDay) {
+      if (this.mode === "supabase") {
+        return this.sb.from("manual_earnings").select("*")
+          .eq("chef_id", chefId).gte("day", fromDay).lte("day", toDay)
+          .then(function (r) { return r.data || []; });
+      }
+      if (this.mode === "claude") {
+        return this._cList("private/inbox/manual").then(function (rows) {
+          return rows.filter(function (m) {
+            return m.chef_id === chefId && m.day >= fromDay && m.day <= toDay;
+          });
+        });
+      }
+      return Promise.resolve(lsGet("srn_manual", []).filter(function (m) {
+        return m.chef_id === chefId && m.day >= fromDay && m.day <= toDay;
+      }));
+    },
+    addManual: function (rec) {
+      if (this.mode === "supabase") {
+        return this.sb.from("manual_earnings").insert(rec).then(thrower);
+      }
+      if (this.mode === "claude") {
+        return this._cPut("private/inbox/manual", uid(), rec);
+      }
+      var rows = lsGet("srn_manual", []);
+      rows.push(Object.assign({ id: uid() }, rec));
+      lsSet("srn_manual", rows);
+      return Promise.resolve();
+    },
+
+    /* ---- sign in ----
+       The PIN is the account password. Supabase stores it hashed and checks
+       it server-side, so it never appears in this page's source. */
+    signIn: function (chefId, pin) {
+      var self = this;
+      if (this.mode === "supabase") {
+        return this.sb.auth.signInWithPassword({
+          email: chefId + "@srnkitchen.app", password: pin
+        }).then(function (r) {
+          if (r.error) throw new Error(r.error.message || "Sign in failed");
+          self.chefId = chefId;
+        });
+      }
+      if (this.mode === "claude") {
+        /* PINs live in a document only signed-in collaborators can read, so
+           they are not visible to anyone who merely opens the page. */
+        return this.cdb.doc("private/auth").get().then(function (s) {
+          var pins = (s.exists && s.data().pins) || {};
+          if (!pins[chefId] || String(pins[chefId]) !== pin) {
+            throw new Error("Invalid credentials");
+          }
+          self.chefId = chefId;
+        });
+      }
+      /* On-device mode there is no server to ask, so any PIN opens the
+         kitchen side. Nothing here is shared, so nothing is exposed. */
+      self.chefId = chefId;
+      return Promise.resolve();
+    },
+    signOut: function () {
+      this.chefId = null;
+      if (this.mode === "supabase") return this.sb.auth.signOut();
+      return Promise.resolve();
+    },
+    changePin: function (pin) {
+      if (this.mode === "supabase") {
+        return this.sb.auth.updateUser({ password: pin }).then(function (r) {
+          if (r.error) throw new Error(r.error.message); });
+      }
+      return Promise.reject(new Error("offline"));
+    },
+
+    /* ---- dish photo ---- */
+    uploadPhoto: function (blob, name) {
+      if (this.mode !== "supabase") {
+        return new Promise(function (res) {
+          var fr = new FileReader();
+          fr.onload = function () { res(fr.result); };
+          fr.readAsDataURL(blob);
+        });
+      }
+      var self = this, path = uid() + "-" + name.replace(/[^\w.]+/g, "_");
+      return this.sb.storage.from("dish-photos").upload(path, blob, { contentType: "image/jpeg" })
+        .then(function (r) {
+          if (r.error) throw new Error(r.error.message);
+          return self.sb.storage.from("dish-photos").getPublicUrl(path).data.publicUrl;
+        });
+    }
+  };
+  function thrower(r) { if (r && r.error) throw new Error(r.error.message); return r; }
+
+  /* ============================================================
+     state
+     ============================================================ */
+  var state = {
+    view: "menu", slot: "any", diet: "any", sub: "dishes",
+    chefs: [], dishes: [], reviews: [], orders: [],
+    cart: lsGet("srn_cart", {}),
+    loaded: false, pendingPhoto: null, newDiet: "veg",
+    reviewDraft: { rating: 0 },
+    cal: { y: new Date().getFullYear(), m: new Date().getMonth(), day: null,
+           byDay: {}, ordersByDay: {}, loading: false }
+  };
+
+  function chefById(id) {
+    return state.chefs.filter(function (c) { return c.id === id; })[0] || null;
+  }
+  function me() { return chefById(DB.chefId); }
+
+  /* ============================================================
+     small renderers
      ============================================================ */
   function vmark(diet) {
     return '<span class="vmark' + (diet === "nonveg" ? " non" : "") + '" role="img" aria-label="' +
@@ -780,10 +1048,9 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
      MENU
      ============================================================ */
   function visibleDishes() {
-    var roster = chefRoster();
     return state.dishes.filter(function (d) {
       if (!d.available) return false;
-      var c = roster.filter(function (x) { return x.id === d.chefId; })[0];
+      var c = chefById(d.chef_id);
       if (c && !c.open) return false;
       if (state.diet !== "any" && d.diet !== state.diet) return false;
       if (state.slot !== "any" && d.slot !== "all" && d.slot !== state.slot) return false;
@@ -792,102 +1059,91 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
   }
 
   function renderFilters() {
-    var sc = $("#slotChips"), dc = $("#dietChips");
-    sc.innerHTML = SLOTS.map(function (s) {
+    $("#slotChips").innerHTML = SLOTS.map(function (s) {
       return '<button class="chip" data-slot="' + s.id + '" aria-pressed="' +
         (state.slot === s.id) + '">' + esc(s.label) + "</button>";
     }).join("");
-    dc.innerHTML =
+    $("#dietChips").innerHTML =
       '<button class="chip" data-diet="any" aria-pressed="' + (state.diet === "any") + '">Veg &amp; non-veg</button>' +
       '<button class="chip" data-diet="veg" aria-pressed="' + (state.diet === "veg") + '">' + vmark("veg") + "Veg only</button>" +
       '<button class="chip" data-diet="nonveg" aria-pressed="' + (state.diet === "nonveg") + '">' + vmark("nonveg") + "Non-veg only</button>";
   }
 
-  function dishCard(d, chefOpen) {
+  function dishCard(d, orderable) {
     var qty = state.cart[d.id] ? state.cart[d.id].qty : 0;
-    var img = state.images[d.id];
-    var thumb = img
-      ? '<img src="' + img + '" alt="" loading="lazy">'
+    var thumb = d.image_url
+      ? '<img src="' + esc(d.image_url) + '" alt="" loading="lazy">'
       : '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16.5h16M5.5 16.5a6.5 6.5 0 0113 0M12 6.2v1.4M8 20h8"/></svg>';
-
-    return '<article class="dish' + (chefOpen ? "" : " off") + '">' +
+    return '<article class="dish' + (orderable ? "" : " off") + '">' +
       '<div class="dish-thumb">' + thumb + "</div>" +
       '<div class="dish-main">' +
         '<div class="dish-title">' + vmark(d.diet) + "<h4>" + esc(d.name) + "</h4></div>" +
         (d.note ? '<p class="dish-note">' + esc(d.note) + "</p>" : "") +
         '<div class="dish-meta"><span class="slotpill">' + esc(SLOT_LABEL[d.slot] || "All day") + "</span>" +
-          (d.chefName ? '<span class="muted" style="font-size:12.5px">by ' + esc(d.chefName) + "</span>" : "") +
+          (d.chef_name ? '<span class="muted" style="font-size:12.5px">by ' + esc(d.chef_name) + "</span>" : "") +
         "</div>" +
         '<div class="dish-foot">' +
           '<span class="price tnum">' + money(d.price) + "</span>" +
-          (qty > 0
-            ? '<span class="stepper"><button data-dec="' + d.id + '" aria-label="One less ' + esc(d.name) + '">−</button>' +
-              '<span class="qty tnum">' + qty + "</span>" +
-              '<button data-inc="' + d.id + '" aria-label="One more ' + esc(d.name) + '">+</button></span>'
-            : '<button class="btn add" data-inc="' + d.id + '">Add</button>') +
+          (!orderable
+            ? '<span class="muted" style="font-size:13px">Not taking orders</span>'
+            : qty > 0
+              ? '<span class="stepper"><button data-dec="' + d.id + '" aria-label="One less">−</button>' +
+                '<span class="qty tnum">' + qty + "</span>" +
+                '<button data-inc="' + d.id + '" aria-label="One more">+</button></span>'
+              : '<button class="btn add" data-inc="' + d.id + '">Add</button>') +
         "</div>" +
       "</div></article>";
   }
 
   function renderMenu() {
-    var skel = $("#menuSkeleton"), list = $("#menuList"), empty = $("#menuEmpty");
     if (!state.loaded) return;
-    skel.hidden = true;
-
-    var anyPosted = state.dishes.some(function (d) { return d.available; });
+    $("#menuSkeleton").hidden = true;
+    var list = $("#menuList"), empty = $("#menuEmpty");
+    var posted = state.dishes.filter(function (d) { return d.available; });
     var shown = visibleDishes();
-    var roster = chefRoster();
 
-    $("#filterBox").hidden = !anyPosted;
+    $("#filterBox").hidden = !posted.length;
     $("#menuDate").textContent = new Date().toLocaleDateString("en-IN",
       { weekday: "long", day: "numeric", month: "long" });
 
-    if (!anyPosted) {
+    if (!posted.length) {
       list.innerHTML = ""; empty.hidden = false;
       $("#emptySub").textContent = "Our chefs haven't posted today's meals yet. Check back a little later.";
       $("#menuSub").textContent = "Nothing on the stove just yet.";
       return;
     }
-
     if (!shown.length) {
       list.innerHTML = ""; empty.hidden = false;
-      $("#emptySub").textContent = "Nothing matches that filter right now. Try another meal or clear the veg filter.";
+      $("#emptySub").textContent = "Nothing matches that filter right now. Try another meal, or clear the veg filter.";
       $("#menuSub").textContent = "No dishes match your filters.";
       return;
     }
-
     empty.hidden = true;
+    var chefCount = state.chefs.filter(function (c) {
+      return shown.some(function (d) { return d.chef_id === c.id; });
+    }).length;
     $("#menuSub").textContent = shown.length + (shown.length === 1 ? " dish" : " dishes") +
-      " from " + roster.filter(function (c) {
-        return shown.some(function (d) { return d.chefId === c.id; });
-      }).length + " of our chefs.";
+      " from " + chefCount + (chefCount === 1 ? " chef" : " of our chefs") + ".";
 
     var html = "";
-    roster.forEach(function (c) {
-      var mine = shown.filter(function (d) { return d.chefId === c.id; });
-      if (!mine.length) return;
-      html += '<section class="chefgroup"><div class="chefhead">' +
-        "<h3>" + esc(c.name) + "</h3>" +
-        '<span class="count tnum">' + mine.length + "</span>" +
-        '<span class="badge open">Taking orders</span>' +
-        "</div>" + mine.map(function (d) { return dishCard(d, true); }).join("") + "</section>";
+    state.chefs.forEach(function (c) {
+      var mine = shown.filter(function (d) { return d.chef_id === c.id; });
+      if (mine.length) {
+        html += '<section class="chefgroup"><div class="chefhead"><h3>' + esc(c.name) + "</h3>" +
+          '<span class="count tnum">' + mine.length + "</span>" +
+          '<span class="badge open">Taking orders</span></div>' +
+          mine.map(function (d) { return dishCard(d, true); }).join("") + "</section>";
+      }
     });
-
-    /* chefs who have dishes but closed their counter — shown, greyed, not orderable */
-    roster.forEach(function (c) {
+    state.chefs.forEach(function (c) {
       if (c.open) return;
-      var mine = state.dishes.filter(function (d) { return d.chefId === c.id && d.available; });
+      var mine = posted.filter(function (d) { return d.chef_id === c.id; });
       if (!mine.length) return;
-      html += '<section class="chefgroup"><div class="chefhead">' +
-        "<h3>" + esc(c.name) + "</h3>" +
+      html += '<section class="chefgroup"><div class="chefhead"><h3>' + esc(c.name) + "</h3>" +
         '<span class="count tnum">' + mine.length + "</span>" +
-        '<span class="badge closed">Closed for now</span>' +
-        "</div>" + mine.map(function (d) {
-          return dishCard(d, false).replace(/<button class="btn add"[^>]*>Add<\/button>/,
-            '<span class="muted" style="font-size:13px">Not taking orders</span>');
-        }).join("") + "</section>";
+        '<span class="badge closed">Closed for now</span></div>' +
+        mine.map(function (d) { return dishCard(d, false); }).join("") + "</section>";
     });
-
     list.innerHTML = html;
   }
 
@@ -896,43 +1152,37 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
      ============================================================ */
   function cartLines() {
     return Object.keys(state.cart).map(function (id) {
-      var line = state.cart[id];
-      var d = state.dishes.filter(function (x) { return x.id === id; })[0];
+      var d = state.dishes.filter(function (x) { return String(x.id) === String(id); })[0];
       if (!d) return null;
-      return { id: id, qty: line.qty, dish: d, amount: line.qty * Number(d.price || 0) };
+      var qty = state.cart[id].qty;
+      return { id: id, qty: qty, dish: d, amount: qty * Number(d.price || 0) };
     }).filter(Boolean);
   }
   function cartByChef() {
-    var groups = {};
+    var g = {};
     cartLines().forEach(function (l) {
-      var cid = l.dish.chefId;
-      (groups[cid] = groups[cid] || { chef: chefById(cid), lines: [], total: 0 });
-      groups[cid].lines.push(l);
-      groups[cid].total += l.amount;
+      var k = l.dish.chef_id;
+      (g[k] = g[k] || { chef: chefById(k), lines: [], total: 0 });
+      g[k].lines.push(l); g[k].total += l.amount;
     });
-    return Object.keys(groups).map(function (k) { return groups[k]; });
+    return Object.keys(g).map(function (k) { return g[k]; });
   }
-  function cartTotal() {
-    return cartLines().reduce(function (s, l) { return s + l.amount; }, 0);
-  }
-  function cartCount() {
-    return cartLines().reduce(function (s, l) { return s + l.qty; }, 0);
-  }
+  function cartTotal() { return cartLines().reduce(function (s, l) { return s + l.amount; }, 0); }
+  function cartCount() { return cartLines().reduce(function (s, l) { return s + l.qty; }, 0); }
 
   function bump(id, delta) {
     var cur = state.cart[id] ? state.cart[id].qty : 0;
     var next = Math.max(0, Math.min(99, cur + delta));
-    if (next === 0) delete state.cart[id];
-    else state.cart[id] = { qty: next };
+    if (next === 0) delete state.cart[id]; else state.cart[id] = { qty: next };
     lsSet("srn_cart", state.cart);
     renderMenu(); renderCartBar();
-    if ($("#sheet").hidden === false && sheetMode === "cart") openCart();
+    if (!$("#sheet").hidden && sheetMode === "cart") openCart();
   }
 
   function renderCartBar() {
     var n = cartCount(), bar = $("#cartBar");
     bar.hidden = n === 0 || state.view === "chef";
-    if (n === 0) return;
+    if (!n) return;
     $("#cartTotal").textContent = money(cartTotal());
     $("#cartCount").textContent = n + (n === 1 ? " item" : " items") + " · before delivery";
   }
@@ -946,7 +1196,6 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     $("#sheetTitle").textContent = title;
     $("#sheetBody").innerHTML = html;
     $("#sheet").hidden = false;
-    $("#sheetCard") && null;
     $(".sheet-card").scrollTop = 0;
   }
   function closeSheet() { $("#sheet").hidden = true; sheetMode = null; }
@@ -955,20 +1204,19 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     var groups = cartByChef();
     if (!groups.length) { closeSheet(); return; }
     var html = groups.map(function (g) {
-      return '<div class="cartchef">' +
-        '<div class="cartchef-head"><h4>' + esc(g.chef ? g.chef.name : "Kitchen") + "</h4></div>" +
+      return '<div class="cartchef"><div class="cartchef-head"><h4>' +
+        esc(g.chef ? g.chef.name : "Kitchen") + "</h4></div>" +
         g.lines.map(function (l) {
-          return '<div class="cartline">' +
-            '<span class="nm">' + vmark(l.dish.diet) + "<span>" + esc(l.dish.name) + "</span></span>" +
+          return '<div class="cartline"><span class="nm">' + vmark(l.dish.diet) +
+            "<span>" + esc(l.dish.name) + "</span></span>" +
             '<span class="stepper"><button data-dec="' + l.id + '" aria-label="One less">−</button>' +
             '<span class="qty tnum">' + l.qty + "</span>" +
             '<button data-inc="' + l.id + '" aria-label="One more">+</button></span>' +
             '<span class="amt tnum">' + money(l.amount) + "</span></div>";
         }).join("") +
         '<div class="cartchef-foot"><span>Pay ' + esc(g.chef ? g.chef.name : "kitchen") +
-          '</span><b class="tnum">' + money(g.total) + "</b></div></div>";
+        '</span><b class="tnum">' + money(g.total) + "</b></div></div>";
     }).join("");
-
     html += '<div class="grand"><span class="lbl">Total</span><span class="val tnum">' + money(cartTotal()) + "</span></div>";
     html += '<p class="muted" style="font-size:13px;margin:6px 2px 14px">Each chef is paid separately, as shown above.</p>';
     html += '<div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/></svg><span>' + esc(DELIVERY_NOTE) + "</span></div>";
@@ -977,72 +1225,76 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
   }
 
   function openDetails() {
-    var saved = lsGet("srn_customer", { name: "", phone: "", address: "" });
+    var s = lsGet("srn_customer", { name: "", phone: "", tower: "", flat: "" });
     openSheet("Delivery details",
       '<form id="custForm" autocomplete="on">' +
-        '<div class="field"><label for="cName">Your name</label>' +
-        '<input type="text" id="cName" name="name" autocomplete="name" maxlength="60" value="' + esc(saved.name) + '" required></div>' +
-        '<div class="field"><label for="cPhone">Phone number</label>' +
-        '<input type="tel" id="cPhone" name="tel" autocomplete="tel" inputmode="numeric" maxlength="14" placeholder="10-digit mobile" value="' + esc(saved.phone) + '" required>' +
-        '<span class="err" id="phoneErr" hidden>Enter a 10-digit mobile number.</span></div>' +
-        '<div class="field"><label for="cAddr">Residential address</label>' +
-        '<textarea id="cAddr" name="street-address" autocomplete="street-address" maxlength="300" placeholder="Flat / house, street, landmark, area" required>' + esc(saved.address) + "</textarea></div>" +
-        '<div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/></svg><span>' + esc(DELIVERY_NOTE) + "</span></div>" +
-        '<div class="grand"><span class="lbl">Total</span><span class="val tnum">' + money(cartTotal()) + "</span></div>" +
-        '<button class="btn full" type="submit" style="margin-top:14px">Place order</button>' +
-      "</form>", "details");
+      '<div class="field"><label for="cName">Your name</label>' +
+      '<input type="text" id="cName" autocomplete="name" maxlength="60" value="' + esc(s.name) + '" required></div>' +
+      '<div class="field"><label for="cPhone">Phone number</label>' +
+      '<input type="tel" id="cPhone" autocomplete="tel" inputmode="numeric" maxlength="14" placeholder="10-digit mobile" value="' + esc(s.phone) + '" required>' +
+      '<span class="err" id="phoneErr" hidden>Enter a 10-digit mobile number.</span></div>' +
+      '<div class="field"><label for="cTower">Apartment / complex</label><select id="cTower" required>' +
+      '<option value="">Choose one…</option>' +
+      TOWERS.map(function (t) {
+        return '<option value="' + esc(t) + '"' + (s.tower === t ? " selected" : "") + ">" + esc(t) + "</option>";
+      }).join("") + "</select></div>" +
+      '<div class="field"><label for="cFlat">Flat / house number</label>' +
+      '<input type="text" id="cFlat" maxlength="24" placeholder="e.g. 2104, or B-605" value="' + esc(s.flat) + '" required>' +
+      '<span class="hint">This is what the kitchen uses to find you.</span></div>' +
+      '<div class="field"><label for="cNote">Anything else <span class="hint">(optional)</span></label>' +
+      '<textarea id="cNote" maxlength="200" placeholder="Landmark, less spicy, collect from security…"></textarea></div>' +
+      '<div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/></svg><span>' + esc(DELIVERY_NOTE) + "</span></div>" +
+      '<div class="grand"><span class="lbl">Total</span><span class="val tnum">' + money(cartTotal()) + "</span></div>" +
+      '<button class="btn full" type="submit" style="margin-top:14px">Place order</button></form>', "details");
   }
 
-  function orderText(order, group) {
-    var lines = ["*New order — SRN Kitchen*", ""];
-    group.lines.forEach(function (l) {
-      lines.push("• " + l.dish.name + " x" + l.qty + " — " + money(l.amount));
+  function orderText(cust, group) {
+    var l = ["*New order — SRN Kitchen*", ""];
+    group.lines.forEach(function (x) {
+      l.push("• " + x.dish.name + " x" + x.qty + " — " + money(x.amount));
     });
-    lines.push("", "Payable to " + (group.chef ? group.chef.name : "kitchen") + ": " + money(group.total));
-    lines.push("", "Name: " + order.customer.name);
-    lines.push("Phone: " + order.customer.phone);
-    lines.push("Address: " + order.customer.address);
-    lines.push("", DELIVERY_NOTE);
-    return lines.join("\n");
+    l.push("", "Payable to " + (group.chef ? group.chef.name : "kitchen") + ": " + money(group.total));
+    l.push("", "Name: " + cust.customer_name, "Phone: " + cust.phone,
+           "Where: " + cust.tower + ", flat " + cust.flat);
+    if (cust.note) l.push("Note: " + cust.note);
+    l.push("", DELIVERY_NOTE);
+    return l.join("\n");
   }
 
-  function placeOrder(customer) {
+  function placeOrder(cust) {
     var groups = cartByChef();
-    var order = {
-      customer: customer,
-      placedAt: Date.now(),
-      grand: cartTotal(),
+    var order = Object.assign({}, cust, {
       items: cartLines().map(function (l) {
-        return { name: l.dish.name, qty: l.qty, price: Number(l.dish.price), chefId: l.dish.chefId, amount: l.amount };
-      })
-    };
+        return { chef_id: l.dish.chef_id, name: l.dish.name,
+                 qty: l.qty, price: Number(l.dish.price), amount: l.amount };
+      }),
+      grand: cartTotal()
+    });
 
-    /* best effort — customers on a shared link usually can't write */
-    Store.put("orders", uid(), order).catch(function () {});
+    DB.createOrder(order).catch(function () {});
 
     var html = '<div class="center" style="padding:6px 0 18px">' +
       '<img class="seal-xl" style="width:120px;height:120px;margin:0 auto 14px" src="' + SEAL + '" alt="">' +
-      '<p class="tagline" style="font-size:18px">Order ready to send</p>' +
-      '<p class="muted" style="font-size:14px;margin-top:8px;max-width:26em;margin-inline:auto">Send it to each chef on WhatsApp so they can confirm and start cooking.</p></div>';
+      '<p class="tagline" style="font-size:18px">Order placed</p>' +
+      '<p class="muted" style="font-size:14px;margin-top:8px;max-width:26em;margin-inline:auto">' +
+      'Send it on to each chef so she can confirm and start cooking.</p></div>';
 
     html += groups.map(function (g) {
       var msg = encodeURIComponent(orderText(order, g));
-      var phone = g.chef ? g.chef.phone : "";
       return '<div class="cartchef"><div class="cartchef-head"><h4>' + esc(g.chef ? g.chef.name : "Kitchen") +
-        '</h4><b class="tnum">' + money(g.total) + "</b></div>" +
-        '<div style="padding:12px 13px">' +
-        '<a class="btn accent full" href="https://wa.me/' + phone + "?text=" + msg + '" target="_blank" rel="noopener">Send to ' + esc(g.chef ? g.chef.name : "chef") + " on WhatsApp</a>" +
+        '</h4><b class="tnum">' + money(g.total) + "</b></div><div style='padding:12px 13px'>" +
+        '<a class="btn accent full" href="https://wa.me/' + (g.chef ? g.chef.phone : "") + "?text=" + msg +
+        '" target="_blank" rel="noopener">Send to ' + esc(g.chef ? g.chef.name : "chef") + " on WhatsApp</a>" +
         '<button class="btn ghost full sm" style="margin-top:8px" data-copy="' + esc(orderText(order, g)) + '">Copy this order</button>' +
         "</div></div>";
     }).join("");
-
-    html += '<div class="note plain" style="margin-top:6px">Payment is collected by each chef. ' + esc(DELIVERY_NOTE) + "</div>";
+    html += '<div class="note plain" style="margin-top:6px">Each chef collects her own payment. ' + esc(DELIVERY_NOTE) + "</div>";
     html += '<button class="btn ghost full" id="doneOrder" style="margin-top:16px">Done</button>';
-
     openSheet("Almost there", html, "done");
 
     state.cart = {}; lsSet("srn_cart", state.cart);
-    lsSet("srn_customer", customer);
+    lsSet("srn_customer", { name: cust.customer_name, phone: cust.phone,
+                            tower: cust.tower, flat: cust.flat });
     renderMenu(); renderCartBar();
   }
 
@@ -1050,74 +1302,58 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
      REVIEWS
      ============================================================ */
   function renderReviews() {
-    var list = state.reviews.slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
-    var sum = $("#rateSum");
-
+    var list = state.reviews.slice();
     if (!list.length) {
-      sum.innerHTML = '<div class="note plain">No reviews yet. If we have fed you, you get the first word.</div>';
-      $("#reviewList").innerHTML = "";
-      return;
+      $("#rateSum").innerHTML = '<div class="note plain">No reviews yet. If we have fed you, you get the first word.</div>';
+      $("#reviewList").innerHTML = ""; return;
     }
     var avg = list.reduce(function (s, r) { return s + (Number(r.rating) || 0); }, 0) / list.length;
-    sum.innerHTML = '<div class="ratesum"><span class="big tnum">' + avg.toFixed(1) + "</span><div>" +
-      starRow(Math.round(avg)) + '<p class="muted" style="font-size:13px">' + list.length +
-      (list.length === 1 ? " review" : " reviews") + "</p></div></div>";
-
+    $("#rateSum").innerHTML = '<div class="ratesum"><span class="big tnum">' + avg.toFixed(1) +
+      "</span><div>" + starRow(Math.round(avg)) + '<p class="muted" style="font-size:13px">' +
+      list.length + (list.length === 1 ? " review" : " reviews") + "</p></div></div>";
     $("#reviewList").innerHTML = list.map(function (r) {
       return '<div class="review"><div class="review-head">' +
-        '<span class="who">' + esc(r.name || "A guest") + "</span>" +
-        starRow(Number(r.rating) || 0) +
-        '<span class="when">' + esc(when(r.createdAt)) + "</span></div>" +
-        (r.text ? "<p>" + esc(r.text) + "</p>" : "") + "</div>";
+        '<span class="who">' + esc(r.name || "A guest") + "</span>" + starRow(Number(r.rating) || 0) +
+        '<span class="when">' + esc(when(r.created_at)) + "</span></div>" +
+        (r.body ? "<p>" + esc(r.body) + "</p>" : "") + "</div>";
     }).join("");
   }
 
   function openReviewForm() {
-    state.reviewDraft = { rating: 0, text: "", name: lsGet("srn_customer", {}).name || "" };
-    var html = '<div class="field"><label>How was it?</label>' +
-      '<div class="starpick" id="starPick">' +
-      [1, 2, 3, 4, 5].map(function (i) {
-        return '<button type="button" data-star="' + i + '" aria-label="' + i + ' star' + (i > 1 ? "s" : "") + '">' + starSvg(false) + "</button>";
-      }).join("") + "</div>" +
-      '<span class="err" id="rateErr" hidden>Pick a rating first.</span></div>' +
+    state.reviewDraft = { rating: 0 };
+    openSheet("Rate your food",
+      '<div class="field"><label>How was it?</label><div class="starpick" id="starPick">' +
+      [1,2,3,4,5].map(function (i) {
+        return '<button type="button" data-star="' + i + '" aria-label="' + i + ' star' + (i>1?"s":"") + '">' + starSvg(false) + "</button>";
+      }).join("") + '</div><span class="err" id="rateErr" hidden>Pick a rating first.</span></div>' +
       '<div class="field"><label for="rName">Your name <span class="hint">(optional)</span></label>' +
-      '<input type="text" id="rName" maxlength="40" value="' + esc(state.reviewDraft.name) + '" placeholder="A guest"></div>' +
+      '<input type="text" id="rName" maxlength="40" value="' + esc(lsGet("srn_customer", {}).name || "") + '" placeholder="A guest"></div>' +
       '<div class="field"><label for="rText">A few words <span class="hint">(optional)</span></label>' +
       '<textarea id="rText" maxlength="400" placeholder="What did you have, and how was it?"></textarea>' +
       '<div class="emojirow" id="emojiRow">' + EMOJIS.map(function (e) {
         return '<button type="button" data-emoji="' + e + '" aria-label="Add ' + e + '">' + e + "</button>";
       }).join("") + "</div></div>" +
-      '<button class="btn full" id="submitReview">Post review</button>';
-    openSheet("Rate your food", html, "review");
+      '<button class="btn full" id="submitReview">Post review</button>', "review");
   }
-
   function paintStars() {
     $$("#starPick button").forEach(function (b) {
       b.innerHTML = starSvg(Number(b.dataset.star) <= state.reviewDraft.rating);
     });
   }
-
   function submitReview() {
     if (!state.reviewDraft.rating) { $("#rateErr").hidden = false; return; }
-    var rec = {
+    var btn = $("#submitReview"); btn.disabled = true; btn.textContent = "Posting…";
+    DB.createReview({
       name: ($("#rName").value || "").trim().slice(0, 40),
       rating: state.reviewDraft.rating,
-      text: ($("#rText").value || "").trim().slice(0, 400),
-      createdAt: Date.now()
-    };
-    var btn = $("#submitReview");
-    btn.disabled = true; btn.textContent = "Posting…";
-
-    Store.put("reviews", uid(), rec).then(function () {
-      closeSheet(); toast("Thank you — your review is up.");
+      body: ($("#rText").value || "").trim().slice(0, 400)
+    }).then(function () {
+      return DB.reviews();
+    }).then(function (rows) {
+      state.reviews = rows; renderReviews(); closeSheet(); toast("Thank you — your review is up.");
     }).catch(function () {
-      /* no write access on this link — hand it over on WhatsApp instead */
-      var msg = encodeURIComponent("*Review for SRN Kitchen*\n" + rec.rating + "/5 stars\n" +
-        (rec.text ? rec.text + "\n" : "") + "— " + (rec.name || "A guest"));
-      $("#sheetBody").innerHTML =
-        '<div class="note">We could not post that from this link. Send it to us on WhatsApp and we will add it.</div>' +
-        '<a class="btn accent full" style="margin-top:14px" href="https://wa.me/' + CHEFS[0].phone + "?text=" + msg + '" target="_blank" rel="noopener">Send review on WhatsApp</a>' +
-        '<button class="btn ghost full" id="doneOrder" style="margin-top:9px">Close</button>';
+      btn.disabled = false; btn.textContent = "Post review";
+      toast("Couldn't post that. Check your connection and try again.");
     });
   }
 
@@ -1125,136 +1361,126 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
      CONTACT
      ============================================================ */
   function renderContact() {
-    $("#contactList").innerHTML = chefRoster().map(function (c) {
-      var pretty = "+" + c.phone.slice(0, 2) + " " + c.phone.slice(2, 7) + " " + c.phone.slice(7);
-      return '<div class="contactcard">' +
-        '<span class="av">' + esc(c.name.slice(0, 1)) + "</span>" +
+    $("#contactList").innerHTML = state.chefs.map(function (c) {
+      var p = c.phone, pretty = "+" + p.slice(0, 2) + " " + p.slice(2, 7) + " " + p.slice(7);
+      return '<div class="contactcard"><span class="av">' + esc(c.name.slice(0, 1)) + "</span>" +
         '<div class="info"><strong>' + esc(c.name) + "</strong>" +
-        '<a href="tel:+' + c.phone + '">' + esc(pretty) + "</a></div>" +
-        '<div class="acts">' +
-        '<a class="circbtn" href="https://wa.me/' + c.phone + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + esc(c.name) + '">' +
-          '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm0 18a8 8 0 01-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.8c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.5.1-.6.8-.8 1-.3.2-.5.1a6.5 6.5 0 01-3.2-2.8c-.2-.4.2-.4.6-1.2a.5.5 0 000-.5c0-.1-.5-1.3-.7-1.7s-.4-.4-.5-.4h-.5a1 1 0 00-.7.3A2.8 2.8 0 006 9.2c0 1.7 1.2 3.3 1.4 3.5a9.6 9.6 0 003.7 3.3c1.8.7 1.8.5 2.2.4a2.5 2.5 0 001.6-1.1 2 2 0 00.1-1.1z"/></svg></a>' +
-        '<button class="circbtn" data-copy="+' + c.phone + '" aria-label="Copy ' + esc(c.name) + "'s number\">" +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5.8A.8.8 0 015.8 5H15"/></svg></button>' +
-        "</div></div>";
+        '<a href="tel:+' + esc(p) + '">' + esc(pretty) + "</a></div><div class='acts'>" +
+        '<a class="circbtn" href="https://wa.me/' + esc(p) + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + esc(c.name) + '">' +
+        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15L2 22l5.2-1.4A10 10 0 1012 2zm0 18a8 8 0 01-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1112 20zm4.4-5.8c-.2-.1-1.4-.7-1.7-.8s-.4-.1-.5.1-.6.8-.8 1-.3.2-.5.1a6.5 6.5 0 01-3.2-2.8c-.2-.4.2-.4.6-1.2a.5.5 0 000-.5c0-.1-.5-1.3-.7-1.7s-.4-.4-.5-.4h-.5a1 1 0 00-.7.3A2.8 2.8 0 006 9.2c0 1.7 1.2 3.3 1.4 3.5a9.6 9.6 0 003.7 3.3c1.8.7 1.8.5 2.2.4a2.5 2.5 0 001.6-1.1 2 2 0 00.1-1.1z"/></svg></a>' +
+        '<button class="circbtn" data-copy="+' + esc(p) + '" aria-label="Copy number">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5.8A.8.8 0 015.8 5H15"/></svg></button></div></div>';
     }).join("");
   }
 
   /* ============================================================
-     ADMIN
+     CHEF SIDE
      ============================================================ */
+  var picked = null;
+
   function renderChefPick() {
-    $("#chefPick").innerHTML = chefRoster().map(function (c) {
-      return '<button type="button" data-chef="' + c.id + '" aria-pressed="false">' +
+    $("#chefPick").innerHTML = state.chefs.map(function (c) {
+      return '<button type="button" data-chef="' + c.id + '" aria-pressed="' + (picked === c.id) + '">' +
         '<span class="av">' + esc(c.name.slice(0, 1)) + "</span>" + esc(c.name) + "</button>";
     }).join("");
+    $("#loginNote").textContent = DB.mode === "supabase"
+      ? "Your PIN is checked by the server. Forgot it? Ask whoever set the app up to reset it."
+      : "This copy runs on this device only, so the kitchen side is open without a real PIN.";
   }
 
-  var pickedChef = null;
-
   function doLogin() {
-    if (!pickedChef) { toast("Pick your name first."); return; }
-    var entered = ($("#pinInput").value || "").trim();
-    Store.getDoc("private/auth").then(function (auth) {
-      var pins = (auth && auth.pins) || {};
-      var expected = pins[pickedChef] || (CHEFS.filter(function (c) { return c.id === pickedChef; })[0] || {}).pin;
-      if (entered !== String(expected)) { $("#pinErr").hidden = false; return; }
-      $("#pinErr").hidden = true;
-      state.session = { chefId: pickedChef, at: Date.now() };
-      lsSet("srn_session", state.session);
+    if (!picked) { toast("Pick your name first."); return; }
+    var pin = ($("#pinInput").value || "").trim();
+    var err = $("#pinErr"), btn = $("#loginBtn");
+    err.hidden = true; btn.disabled = true; btn.textContent = "Signing in…";
+    DB.signIn(picked, pin).then(function () {
       $("#pinInput").value = "";
       renderAdmin();
+    }).catch(function (e) {
+      err.textContent = /Invalid|credential/i.test(e.message || "")
+        ? "That name and PIN don't match. Try again."
+        : "Couldn't sign in. Check your connection and try again.";
+      err.hidden = false;
+    }).then(function () {
+      btn.disabled = false; btn.textContent = "Sign in";
     });
   }
 
   function renderAdmin() {
-    var loggedIn = !!(state.session && state.session.chefId);
-    $("#chefLogin").hidden = loggedIn;
-    $("#chefHome").hidden = !loggedIn;
-    if (!loggedIn) { renderChefPick(); return; }
-
-    var c = chefRoster().filter(function (x) { return x.id === state.session.chefId; })[0];
-    if (!c) { state.session = null; lsSet("srn_session", null); renderAdmin(); return; }
-
+    var inKitchen = !!DB.chefId;
+    $("#chefLogin").hidden = inKitchen;
+    $("#chefHome").hidden = !inKitchen;
+    if (!inKitchen) { renderChefPick(); return; }
+    var c = me();
+    if (!c) { DB.chefId = null; renderAdmin(); return; }
     $("#chefWho").textContent = c.name;
-    var mine = state.dishes.filter(function (d) { return d.chefId === c.id; });
-    var live = mine.filter(function (d) { return d.available; }).length;
-    $("#chefStat").textContent = mine.length + " dishes · " + live + " on the menu";
-    $("#openToggle").checked = c.open;
+    var mine = state.dishes.filter(function (d) { return d.chef_id === c.id; });
+    $("#chefStat").textContent = mine.length + " dishes · " +
+      mine.filter(function (d) { return d.available; }).length + " on the menu";
+    $("#openToggle").checked = !!c.open;
     $("#openLabel").textContent = c.open ? "Open" : "Closed";
     $("#dChef").placeholder = c.name;
-
     renderAdminDishes(mine);
-    renderOrders();
   }
 
   function renderAdminDishes(mine) {
     var box = $("#adminDishes");
     if (!mine.length) {
-      box.innerHTML = '<div class="note plain">Nothing posted yet. Use <b>Add dish</b> to put your first meal on the menu.</div>';
+      box.innerHTML = '<div class="note plain">Nothing posted yet. Use <b>Add</b> to put your first dish on the menu.</div>';
       return;
     }
-    box.innerHTML = mine.slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); })
-      .map(function (d) {
-        var img = state.images[d.id];
-        return '<div class="adish">' +
-          '<div class="dish-thumb" style="width:62px;height:62px">' +
-            (img ? '<img src="' + img + '" alt="">' : '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M4 16.5h16M5.5 16.5a6.5 6.5 0 0113 0M8 20h8"/></svg>') +
-          "</div>" +
-          '<div class="m"><div class="dish-title">' + vmark(d.diet) + "<h4>" + esc(d.name) + "</h4></div>" +
-          '<div class="dish-meta"><span class="slotpill">' + esc(SLOT_LABEL[d.slot]) + "</span>" +
-          '<span class="price tnum" style="font-size:15px">' + money(d.price) + "</span>" +
-          (d.available ? '<span class="badge open">On menu</span>' : '<span class="badge closed">Hidden</span>') + "</div>" +
-          '<div class="acts">' +
-            '<button class="btn ghost sm" data-editprice="' + d.id + '">Edit price</button>' +
-            '<button class="btn ghost sm" data-toggle="' + d.id + '">' + (d.available ? "Take off menu" : "Put on menu") + "</button>" +
-            '<button class="btn danger sm" data-del="' + d.id + '">Remove</button>' +
-          "</div></div></div>";
-      }).join("");
-  }
-
-  function renderOrders() {
-    var box = $("#orderList");
-    if (!state.session) return;
-    var mine = state.orders.filter(function (o) {
-      return (o.items || []).some(function (i) { return i.chefId === state.session.chefId; });
-    }).sort(function (a, b) { return (b.placedAt || 0) - (a.placedAt || 0); });
-
-    if (!mine.length) {
-      box.innerHTML = '<div class="note plain">No orders recorded here yet. Orders customers send you on WhatsApp will not appear in this list.</div>';
-      return;
-    }
-    box.innerHTML = mine.map(function (o) {
-      var items = (o.items || []).filter(function (i) { return i.chefId === state.session.chefId; });
-      var total = items.reduce(function (s, i) { return s + i.amount; }, 0);
-      return '<div class="order"><div class="order-head">' +
-        "<strong>" + esc(o.customer.name) + "</strong>" +
-        '<span class="when">' + esc(when(o.placedAt)) + "</span>" +
-        '<span class="price tnum" style="margin-left:auto">' + money(total) + "</span></div>" +
-        "<ul>" + items.map(function (i) {
-          return "<li>" + esc(i.name) + " ×" + i.qty + " — " + money(i.amount) + "</li>";
-        }).join("") + "</ul>" +
-        '<p class="addr">' + esc(o.customer.address) + "<br>" +
-        '<a href="tel:+91' + esc(o.customer.phone) + '" style="color:var(--accent-ink)">' + esc(o.customer.phone) + "</a></p></div>";
+    box.innerHTML = mine.map(function (d) {
+      return '<div class="adish"><div class="dish-thumb" style="width:62px;height:62px">' +
+        (d.image_url ? '<img src="' + esc(d.image_url) + '" alt="">'
+          : '<svg class="ph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M4 16.5h16M5.5 16.5a6.5 6.5 0 0113 0M8 20h8"/></svg>') +
+        '</div><div class="m"><div class="dish-title">' + vmark(d.diet) + "<h4>" + esc(d.name) + "</h4></div>" +
+        '<div class="dish-meta"><span class="slotpill">' + esc(SLOT_LABEL[d.slot]) + "</span>" +
+        '<span class="price tnum" style="font-size:15px">' + money(d.price) + "</span>" +
+        (d.available ? '<span class="badge open">On menu</span>' : '<span class="badge closed">Hidden</span>') +
+        '</div><div class="acts">' +
+        '<button class="btn ghost sm" data-editprice="' + d.id + '">Edit price</button>' +
+        '<button class="btn ghost sm" data-toggle="' + d.id + '">' + (d.available ? "Take off menu" : "Put on menu") + "</button>" +
+        '<button class="btn danger sm" data-del="' + d.id + '">Remove</button></div></div></div>';
     }).join("");
   }
 
-  /* image downscale so a photo fits comfortably in one record */
+  function renderOrders() {
+    var box = $("#orderList"), c = me();
+    if (!c) return;
+    var mine = state.orders.filter(function (o) {
+      return (o.items || []).some(function (i) { return i.chef_id === c.id; });
+    });
+    if (!mine.length) {
+      box.innerHTML = '<div class="note plain">No orders yet. Orders customers place in the app show up here; anything sent straight to your WhatsApp will not.</div>';
+      return;
+    }
+    box.innerHTML = mine.map(function (o) {
+      var items = o.items.filter(function (i) { return i.chef_id === c.id; });
+      var tot = items.reduce(function (s, i) { return s + Number(i.amount || 0); }, 0);
+      return '<div class="order"><div class="order-head"><strong>' + esc(o.customer_name) + "</strong>" +
+        '<span class="when">' + esc(when(o.placed_at)) + "</span>" +
+        '<span class="price tnum" style="margin-left:auto">' + money(tot) + "</span></div><ul>" +
+        items.map(function (i) { return "<li>" + esc(i.name) + " ×" + i.qty + " — " + money(i.amount) + "</li>"; }).join("") +
+        '</ul><p class="addr">' + esc(o.tower) + ", flat " + esc(o.flat) +
+        (o.note ? "<br>" + esc(o.note) : "") +
+        '<br><a href="tel:+91' + esc(o.phone) + '" style="color:var(--accent-ink)">' + esc(o.phone) + "</a></p></div>";
+    }).join("");
+  }
+
   function shrinkImage(file) {
+    /* Supabase keeps photos as files, so they can be larger. The other modes
+       carry the photo inside the record itself, which is size-capped. */
+    var max = DB.mode === "supabase" ? 720 : 520;
+    var q   = DB.mode === "supabase" ? 0.72 : 0.6;
     return new Promise(function (resolve, reject) {
-      var url = URL.createObjectURL(file);
-      var img = new Image();
+      var url = URL.createObjectURL(file), img = new Image();
       img.onload = function () {
         URL.revokeObjectURL(url);
-        var max = 560;
-        var w = img.width, h = img.height;
-        var scale = Math.min(1, max / Math.max(w, h));
+        var scale = Math.min(1, max / Math.max(img.width, img.height));
         var cv = document.createElement("canvas");
-        cv.width = Math.round(w * scale); cv.height = Math.round(h * scale);
+        cv.width = Math.round(img.width * scale); cv.height = Math.round(img.height * scale);
         cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
-        var q = 0.62, out = cv.toDataURL("image/jpeg", q);
-        while (out.length > 150000 && q > 0.3) { q -= 0.1; out = cv.toDataURL("image/jpeg", q); }
-        resolve(out);
+        cv.toBlob(function (b) { b ? resolve(b) : reject(new Error("encode")); }, "image/jpeg", q);
       };
       img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("bad image")); };
       img.src = url;
@@ -1263,48 +1489,160 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
 
   function submitDish(e) {
     e.preventDefault();
-    if (!state.session) return;
-    var name = $("#dName").value.trim();
-    var price = Number($("#dPrice").value);
+    var c = me(); if (!c) return;
+    var name = $("#dName").value.trim(), price = Number($("#dPrice").value);
     if (!name || !(price > 0)) { toast("Add a name and a price."); return; }
+    var btn = $("#dishSubmit"); btn.disabled = true; btn.textContent = "Posting…";
 
-    var c = chefRoster().filter(function (x) { return x.id === state.session.chefId; })[0];
-    var id = uid();
-    var rec = {
-      chefId: state.session.chefId,
-      chefName: ($("#dChef").value.trim() || c.name).slice(0, 40),
-      name: name.slice(0, 70),
-      note: $("#dNote").value.trim().slice(0, 110),
-      price: Math.round(price),
-      slot: $("#dSlot").value,
-      diet: state.newDiet,
-      available: true,
-      createdAt: Date.now()
-    };
+    var photo = state.pendingPhoto
+      ? DB.uploadPhoto(state.pendingPhoto, name).catch(function () { return null; })
+      : Promise.resolve(null);
 
-    var btn = $("#dishSubmit");
-    btn.disabled = true; btn.textContent = "Posting…";
-
-    var work = Store.put("dishes", id, rec);
-    if (state.pendingImage) {
-      work = work.then(function () { return Store.put("images", id, { data: state.pendingImage }); });
-    }
-    work.then(function () {
+    photo.then(function (url) {
+      return DB.saveDish({
+        chef_id: c.id,
+        chef_name: ($("#dChef").value.trim() || c.name).slice(0, 40),
+        name: name.slice(0, 70),
+        note: $("#dNote").value.trim().slice(0, 110),
+        price: Math.round(price),
+        slot: $("#dSlot").value,
+        diet: state.newDiet,
+        available: true,
+        image_url: url
+      });
+    }).then(refreshDishes).then(function () {
       $("#dishForm").reset();
-      state.pendingImage = null;
-      state.newDiet = "veg";
+      state.pendingPhoto = null; state.newDiet = "veg";
       $("#dPrev").src = PLACEHOLDER;
       $("#dImageLabel").textContent = "Tap to add a photo";
       $$("#dDiet button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.diet === "veg")); });
       toast("Posted. It's on the menu now.");
       setSub("dishes");
     }).catch(function () {
-      toast("Could not post that. Check your connection and try again.");
+      toast("Couldn't post that. Check your connection and try again.");
     }).then(function () {
       btn.disabled = false; btn.textContent = "Post dish";
     });
   }
 
+  /* ============================================================
+     EARNINGS CALENDAR
+     ============================================================ */
+  function monthBounds(y, m) {
+    return { from: new Date(y, m, 1), to: new Date(y, m + 1, 1) };
+  }
+
+  function loadMonth() {
+    var c = me(); if (!c) return Promise.resolve();
+    var b = monthBounds(state.cal.y, state.cal.m);
+    state.cal.loading = true;
+    return Promise.all([
+      DB.ordersBetween(b.from.toISOString(), b.to.toISOString()),
+      DB.manualBetween(c.id, dayKey(b.from), dayKey(new Date(b.to - 86400000)))
+    ]).then(function (res) {
+      var orders = res[0], manual = res[1];
+      var byDay = {}, ordersByDay = {};
+      orders.forEach(function (o) {
+        var items = (o.items || []).filter(function (i) { return i.chef_id === c.id; });
+        if (!items.length) return;
+        var amt = items.reduce(function (s, i) { return s + Number(i.amount || 0); }, 0);
+        var k = dayKey(o.placed_at);
+        byDay[k] = (byDay[k] || 0) + amt;
+        (ordersByDay[k] = ordersByDay[k] || []).push({ order: o, items: items, amount: amt });
+      });
+      manual.forEach(function (mn) {
+        byDay[mn.day] = (byDay[mn.day] || 0) + Number(mn.amount || 0);
+        (ordersByDay[mn.day] = ordersByDay[mn.day] || []).push({ manual: mn, amount: Number(mn.amount || 0) });
+      });
+      state.cal.byDay = byDay; state.cal.ordersByDay = ordersByDay;
+      state.cal.loading = false;
+      renderCalendar();
+    }).catch(function () {
+      state.cal.loading = false;
+      state.cal.byDay = {}; state.cal.ordersByDay = {};
+      renderCalendar();
+    });
+  }
+
+  function renderCalendar() {
+    var y = state.cal.y, m = state.cal.m;
+    $("#calMonth").textContent = MONTHS[m] + " " + y;
+
+    var now = new Date();
+    var future = (y > now.getFullYear()) || (y === now.getFullYear() && m >= now.getMonth());
+    $("#calNext").disabled = future;
+
+    var total = Object.keys(state.cal.byDay).reduce(function (s, k) { return s + state.cal.byDay[k]; }, 0);
+    $("#monthTotal").textContent = money(total);
+
+    var first = new Date(y, m, 1).getDay();
+    var days = new Date(y, m + 1, 0).getDate();
+    var todayKey = dayKey(now);
+    var html = "";
+    for (var i = 0; i < first; i++) html += '<div class="pad"></div>';
+    for (var dnum = 1; dnum <= days; dnum++) {
+      var k = y + "-" + String(m + 1).padStart(2, "0") + "-" + String(dnum).padStart(2, "0");
+      var amt = state.cal.byDay[k] || 0;
+      var ahead = new Date(y, m, dnum) > now;
+      html += '<button data-day="' + k + '" aria-pressed="' + (state.cal.day === k) + '"' +
+        (ahead ? " disabled" : "") +
+        ' class="' + (amt ? "earned " : "") + (k === todayKey ? "today" : "") + '">' +
+        '<span class="dd tnum">' + dnum + "</span>" +
+        (amt ? '<span class="amt tnum">' + shortMoney(amt) + "</span>" : "") + "</button>";
+    }
+    $("#calGrid").innerHTML = html;
+    renderDayPanel();
+  }
+
+  function renderDayPanel() {
+    var box = $("#dayPanel"), k = state.cal.day;
+    if (!k) {
+      box.innerHTML = '<p class="muted center" style="font-size:13.5px;padding:10px 0 20px">Tap a date to see what you earned and who ordered.</p>';
+      return;
+    }
+    var rows = state.cal.ordersByDay[k] || [];
+    var total = state.cal.byDay[k] || 0;
+    var dd = new Date(k + "T00:00:00");
+    var head = '<div class="dayhead"><h4>' +
+      dd.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" }) +
+      '</h4><span class="tot tnum">' + money(total) + "</span></div>";
+
+    if (!rows.length) {
+      box.innerHTML = head + '<p class="muted" style="font-size:13.5px;padding:4px 0 18px">Nothing earned on this day.</p>';
+      return;
+    }
+    box.innerHTML = head + rows.map(function (r) {
+      if (r.manual) {
+        return '<div class="dayorder"><div class="dayorder-head"><strong>Added by hand</strong>' +
+          '<span class="where">' + esc(r.manual.note || "no note") + "</span>" +
+          '<span class="amt tnum">' + money(r.amount) + "</span></div></div>";
+      }
+      var o = r.order;
+      return '<div class="dayorder"><div class="dayorder-head"><strong>' + esc(o.customer_name) + "</strong>" +
+        '<span class="where">' + esc(o.tower) + " · " + esc(o.flat) + "</span>" +
+        '<span class="amt tnum">' + money(r.amount) + "</span></div><ul>" +
+        r.items.map(function (i) {
+          return "<li>" + esc(i.name) + " ×" + i.qty + " — " + money(i.amount) + "</li>";
+        }).join("") + "</ul></div>";
+    }).join("");
+  }
+
+  function openManualEntry() {
+    var today = dayKey(new Date());
+    openSheet("Add earnings for a past day",
+      '<form id="manualForm">' +
+      '<div class="field"><label for="mDay">Day</label>' +
+      '<input type="date" id="mDay" max="' + today + '" value="' + (state.cal.day || today) + '" required></div>' +
+      '<div class="field"><label for="mAmt">Amount you earned (₹)</label>' +
+      '<input type="number" id="mAmt" min="1" step="1" inputmode="numeric" placeholder="1200" required></div>' +
+      '<div class="field"><label for="mNote">What it was <span class="hint">(optional)</span></label>' +
+      '<input type="text" id="mNote" maxlength="80" placeholder="Sunday biryani orders"></div>' +
+      '<button class="btn full" type="submit">Save</button></form>', "manual");
+  }
+
+  /* ============================================================
+     views
+     ============================================================ */
   function setSub(which) {
     state.sub = which;
     $$(".subtabs button").forEach(function (b) {
@@ -1313,24 +1651,39 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     $("#sub-dishes").hidden = which !== "dishes";
     $("#sub-add").hidden = which !== "add";
     $("#sub-orders").hidden = which !== "orders";
+    $("#sub-earn").hidden = which !== "earn";
+    if (which === "orders") {
+      DB.recentOrders().then(function (r) { state.orders = r; renderOrders(); })
+        .catch(function () { renderOrders(); });
+    }
+    if (which === "earn") loadMonth();
   }
 
-  /* ============================================================
-     views
-     ============================================================ */
   function setView(v) {
     state.view = v;
-    ["menu", "reviews", "contact", "chef"].forEach(function (k) {
-      $("#v-" + k).hidden = k !== v;
-    });
+    ["menu", "reviews", "contact", "chef"].forEach(function (k) { $("#v-" + k).hidden = k !== v; });
     $$(".tabbar button").forEach(function (b) {
       b.setAttribute("aria-selected", String(b.dataset.view === v));
     });
-    if (v === "reviews") renderReviews();
+    if (v === "reviews") {
+      DB.reviews().then(function (r) { state.reviews = r; renderReviews(); }).catch(renderReviews);
+    }
     if (v === "contact") renderContact();
     if (v === "chef") renderAdmin();
     renderCartBar();
     window.scrollTo(0, 0);
+  }
+
+  function refreshDishes() {
+    return DB.dishes().then(function (rows) {
+      state.dishes = rows; state.loaded = true;
+      Object.keys(state.cart).forEach(function (id) {
+        if (!rows.some(function (d) { return String(d.id) === String(id); })) delete state.cart[id];
+      });
+      lsSet("srn_cart", state.cart);
+      renderMenu(); renderCartBar();
+      if (state.view === "chef") renderAdmin();
+    });
   }
 
   /* ============================================================
@@ -1339,15 +1692,14 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
   document.addEventListener("click", function (e) {
     var t = e.target.closest("[data-inc],[data-dec],[data-slot],[data-diet],[data-view],[data-sub]," +
       "[data-chef],[data-star],[data-emoji],[data-copy],[data-del],[data-toggle],[data-editprice]," +
-      "#viewCart,#sheetClose,#sheetScrim,#toDetails,#openReview,#submitReview,#doneOrder," +
-      "#loginBtn,#logoutBtn,#themeBtn");
+      "[data-day],[data-saveprice],#viewCart,#sheetClose,#sheetScrim,#toDetails,#openReview," +
+      "#submitReview,#doneOrder,#loginBtn,#logoutBtn,#themeBtn,#calPrev,#calNext,#addManual");
     if (!t) return;
 
     if (t.dataset.inc) return bump(t.dataset.inc, 1);
     if (t.dataset.dec) return bump(t.dataset.dec, -1);
-
-    if (t.dataset.slot) { state.slot = t.dataset.slot; renderFilters(); renderMenu(); return; }
-    if (t.dataset.diet && t.closest("#dietChips")) { state.diet = t.dataset.diet; renderFilters(); renderMenu(); return; }
+    if (t.dataset.slot) { state.slot = t.dataset.slot; renderFilters(); return renderMenu(); }
+    if (t.dataset.diet && t.closest("#dietChips")) { state.diet = t.dataset.diet; renderFilters(); return renderMenu(); }
     if (t.dataset.diet && t.closest("#dDiet")) {
       state.newDiet = t.dataset.diet;
       $$("#dDiet button").forEach(function (b) { b.setAttribute("aria-pressed", String(b === t)); });
@@ -1364,120 +1716,141 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
 
     if (t.dataset.star) {
       state.reviewDraft.rating = Number(t.dataset.star);
-      $("#rateErr") && ($("#rateErr").hidden = true);
-      paintStars(); return;
+      if ($("#rateErr")) $("#rateErr").hidden = true;
+      return paintStars();
     }
     if (t.dataset.emoji) {
-      var ta = $("#rText");
-      ta.value = (ta.value + t.dataset.emoji).slice(0, 400);
-      ta.focus(); return;
+      var ta = $("#rText"); ta.value = (ta.value + t.dataset.emoji).slice(0, 400); ta.focus(); return;
     }
     if (t.dataset.copy) {
-      var text = t.dataset.copy;
+      var txt = t.dataset.copy;
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () { toast("Copied."); })
-          .catch(function () { toast(text); });
-      } else { toast(text); }
+        navigator.clipboard.writeText(txt).then(function () { toast("Copied."); })
+          .catch(function () { toast("Press and hold the text to copy it."); });
+      } else toast("Press and hold the text to copy it.");
       return;
     }
 
-    /* admin */
-    if (t.dataset.chef) {
-      pickedChef = t.dataset.chef;
-      $$("#chefPick button").forEach(function (b) { b.setAttribute("aria-pressed", String(b === t)); });
-      $("#pinErr").hidden = true;
+    /* calendar */
+    if (t.dataset.day) {
+      state.cal.day = (state.cal.day === t.dataset.day) ? null : t.dataset.day;
+      renderCalendar();
+      if (state.cal.day) $("#dayPanel").scrollIntoView({ behavior: "smooth", block: "start" });
       return;
+    }
+    if (t.id === "calPrev") {
+      state.cal.m--; if (state.cal.m < 0) { state.cal.m = 11; state.cal.y--; }
+      state.cal.day = null; return loadMonth();
+    }
+    if (t.id === "calNext") {
+      state.cal.m++; if (state.cal.m > 11) { state.cal.m = 0; state.cal.y++; }
+      state.cal.day = null; return loadMonth();
+    }
+    if (t.id === "addManual") return openManualEntry();
+
+    /* chef */
+    if (t.dataset.chef) {
+      picked = t.dataset.chef;
+      $$("#chefPick button").forEach(function (b) { b.setAttribute("aria-pressed", String(b === t)); });
+      $("#pinErr").hidden = true; return;
     }
     if (t.id === "loginBtn") return doLogin();
     if (t.id === "logoutBtn") {
-      state.session = null; lsSet("srn_session", null); pickedChef = null; renderAdmin(); return;
+      DB.signOut().then(function () { picked = null; renderAdmin(); }); return;
     }
     if (t.dataset.toggle) {
-      var d = state.dishes.filter(function (x) { return x.id === t.dataset.toggle; })[0];
+      var d = state.dishes.filter(function (x) { return String(x.id) === t.dataset.toggle; })[0];
       if (!d) return;
-      var copy = Object.assign({}, d); delete copy.id;
-      copy.available = !d.available;
-      Store.put("dishes", d.id, copy).catch(function () { toast("Could not update that."); });
+      DB.saveDish({ id: d.id, chef_id: d.chef_id, chef_name: d.chef_name, name: d.name,
+                    note: d.note, price: d.price, slot: d.slot, diet: d.diet,
+                    image_url: d.image_url, available: !d.available })
+        .then(refreshDishes).catch(function () { toast("Couldn't update that."); });
       return;
     }
     if (t.dataset.del) {
-      var id = t.dataset.del;
       if (t.dataset.confirm === "1") {
-        Store.remove("dishes", id); Store.remove("images", id).catch(function () {});
+        DB.deleteDish(t.dataset.del).then(refreshDishes)
+          .catch(function () { toast("Couldn't remove that."); });
         return;
       }
       t.dataset.confirm = "1"; t.textContent = "Tap again to remove";
-      setTimeout(function () {
-        if (t.isConnected) { t.dataset.confirm = ""; t.textContent = "Remove"; }
-      }, 3500);
+      setTimeout(function () { if (t.isConnected) { t.dataset.confirm = ""; t.textContent = "Remove"; } }, 3500);
       return;
     }
     if (t.dataset.editprice) {
-      var dd = state.dishes.filter(function (x) { return x.id === t.dataset.editprice; })[0];
+      var dd = state.dishes.filter(function (x) { return String(x.id) === t.dataset.editprice; })[0];
       if (!dd) return;
       openSheet("Edit price",
         '<div class="field"><label for="newPrice">' + esc(dd.name) + " — price (₹)</label>" +
-        '<input type="number" id="newPrice" min="1" max="99999" step="1" inputmode="numeric" value="' + Number(dd.price) + '"></div>' +
-        '<button class="btn full" id="savePrice" data-saveprice="' + dd.id + '">Save price</button>', "price");
+        '<input type="number" id="newPrice" min="1" step="1" inputmode="numeric" value="' + Number(dd.price) + '"></div>' +
+        '<button class="btn full" data-saveprice="' + dd.id + '">Save price</button>', "price");
+      return;
+    }
+    if (t.dataset.saveprice) {
+      var dp = state.dishes.filter(function (x) { return String(x.id) === t.dataset.saveprice; })[0];
+      if (!dp) return closeSheet();
+      var v = Math.round(Number($("#newPrice").value));
+      if (!(v > 0)) { toast("Enter a price above zero."); return; }
+      DB.saveDish({ id: dp.id, chef_id: dp.chef_id, chef_name: dp.chef_name, name: dp.name,
+                    note: dp.note, price: v, slot: dp.slot, diet: dp.diet,
+                    image_url: dp.image_url, available: dp.available })
+        .then(refreshDishes).then(function () { closeSheet(); toast("Price updated."); })
+        .catch(function () { toast("Couldn't save that."); });
       return;
     }
     if (t.id === "themeBtn") {
-      var root = document.documentElement;
-      var now = root.getAttribute("data-theme");
-      var dark = now ? now === "dark"
-        : window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var root = document.documentElement, cur = root.getAttribute("data-theme");
+      var dark = cur ? cur === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
       root.setAttribute("data-theme", dark ? "light" : "dark");
       return;
     }
   });
 
-  /* delegated: save price (button created inside the sheet) */
-  document.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-saveprice]");
-    if (!b) return;
-    var d = state.dishes.filter(function (x) { return x.id === b.dataset.saveprice; })[0];
-    if (!d) return closeSheet();
-    var v = Math.round(Number($("#newPrice").value));
-    if (!(v > 0)) { toast("Enter a price above zero."); return; }
-    var copy = Object.assign({}, d); delete copy.id; copy.price = v;
-    Store.put("dishes", d.id, copy).then(function () { closeSheet(); toast("Price updated."); })
-      .catch(function () { toast("Could not save that."); });
-  });
-
   document.addEventListener("submit", function (e) {
     if (e.target.id === "custForm") {
       e.preventDefault();
-      var phone = $("#cPhone").value
-        .replace(/\D/g, "")
-        .replace(/^0+/, "")             /* 098003… */
-        .replace(/^91(?=\d{10}$)/, ""); /* +91 98003… */
+      var phone = $("#cPhone").value.replace(/\D/g, "").replace(/^0+/, "").replace(/^91(?=\d{10}$)/, "");
       if (phone.length !== 10) { $("#phoneErr").hidden = false; return; }
+      if (!$("#cTower").value) { toast("Choose your apartment or complex."); return; }
       placeOrder({
-        name: $("#cName").value.trim().slice(0, 60),
+        customer_name: $("#cName").value.trim().slice(0, 60),
         phone: phone,
-        address: $("#cAddr").value.trim().slice(0, 300)
+        tower: $("#cTower").value,
+        flat: $("#cFlat").value.trim().slice(0, 24),
+        note: $("#cNote").value.trim().slice(0, 200)
       });
       return;
     }
     if (e.target.id === "dishForm") return submitDish(e);
+    if (e.target.id === "manualForm") {
+      e.preventDefault();
+      var c = me(); if (!c) return;
+      var amt = Number($("#mAmt").value);
+      if (!(amt > 0)) { toast("Enter an amount above zero."); return; }
+      DB.addManual({ chef_id: c.id, day: $("#mDay").value, amount: Math.round(amt),
+                     note: $("#mNote").value.trim().slice(0, 80) })
+        .then(function () { closeSheet(); toast("Added."); return loadMonth(); })
+        .catch(function () { toast("Couldn't save that."); });
+    }
   });
 
   document.addEventListener("change", function (e) {
     if (e.target.id === "openToggle") {
-      if (!state.session) return;
-      var c = chefRoster().filter(function (x) { return x.id === state.session.chefId; })[0];
-      Store.put("chefs", c.id, { name: c.name, open: e.target.checked })
-        .catch(function () { toast("Could not change that."); });
-      $("#openLabel").textContent = e.target.checked ? "Open" : "Closed";
+      var c = me(); if (!c) return;
+      var open = e.target.checked;
+      $("#openLabel").textContent = open ? "Open" : "Closed";
+      DB.saveChef(c.id, { open: open }).then(function () {
+        c.open = open; renderMenu();
+      }).catch(function () { toast("Couldn't change that."); });
       return;
     }
     if (e.target.id === "dImage") {
       var f = e.target.files && e.target.files[0];
       if (!f) return;
       $("#dImageLabel").textContent = "Preparing photo…";
-      shrinkImage(f).then(function (data) {
-        state.pendingImage = data;
-        $("#dPrev").src = data;
+      shrinkImage(f).then(function (blob) {
+        state.pendingPhoto = blob;
+        $("#dPrev").src = URL.createObjectURL(blob);
         $("#dImageLabel").textContent = "Photo ready. Tap to change.";
       }).catch(function () {
         $("#dImageLabel").textContent = "That file didn't work. Try another photo.";
@@ -1490,8 +1863,6 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
   });
 
   var PLACEHOLDER = "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%3Crect%20width%3D%2248%22%20height%3D%2248%22%20fill%3D%22%23EFE3CD%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23C0AE8C%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%2212%22%2F%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%227%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E";
-
-  /* the seal is embedded once, on the header image; everything else reuses it */
   var SEAL = ($("#sealSrc") || {}).src || "";
 
   /* ============================================================
@@ -1502,48 +1873,28 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
   renderFilters();
   setView("menu");
 
-  Store.init().then(function () {
-    Store.watch("chefs", function (rows) {
-      state.chefs = rows;
-      renderMenu();
-      if (state.view === "contact") renderContact();
-      if (state.view === "chef") renderAdmin();
-    });
+  DB.init().then(function () {
+    return Promise.all([
+      DB.chefs().then(function (r) { state.chefs = r.length ? r : CHEFS.map(function (c) {
+        return { id: c.id, name: c.name, phone: c.phone, open: true }; }); }),
+      refreshDishes()
+    ]);
+  }).then(function () {
+    state.loaded = true; renderMenu();
+    if (state.view === "chef") renderAdmin();
+  }).catch(function () {
+    state.loaded = true; renderMenu();
+  });
 
-    Store.watch("dishes", function (rows) {
-      state.dishes = rows;
-      state.loaded = true;
-      /* drop cart lines whose dish is gone */
-      Object.keys(state.cart).forEach(function (id) {
-        if (!rows.some(function (d) { return d.id === id; })) delete state.cart[id];
-      });
-      lsSet("srn_cart", state.cart);
-      renderMenu(); renderCartBar();
-      if (state.view === "chef") renderAdmin();
-    });
-
-    Store.watch("images", function (rows) {
-      var m = {};
-      rows.forEach(function (r) { m[r.id] = r.data; });
-      state.images = m;
-      renderMenu();
-      if (state.view === "chef") renderAdmin();
-    });
-
-    Store.watch("reviews", function (rows) {
-      state.reviews = rows;
-      if (state.view === "reviews") renderReviews();
-    });
-
-    Store.watch("orders", function (rows) {
-      state.orders = rows;
-      if (state.view === "chef" && state.sub === "orders") renderOrders();
-    });
-
-    /* nothing arrived at all — still show the designed empty state */
-    setTimeout(function () {
-      if (!state.loaded) { state.loaded = true; renderMenu(); }
-    }, 2500);
+  /* keep the menu fresh while someone is looking at it */
+  setInterval(function () {
+    if (state.view === "menu" && !document.hidden) {
+      DB.chefs().then(function (r) { if (r.length) state.chefs = r; }).catch(function () {});
+      refreshDishes().catch(function () {});
+    }
+  }, 45000);
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && state.view === "menu") refreshDishes().catch(function () {});
   });
 })();
 </script>

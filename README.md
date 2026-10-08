@@ -4,7 +4,9 @@ A mobile ordering app for SRN Kitchen — homecooked, guilt-free food.
 
 Three chefs post the day's dishes from the kitchen side. Customers open the app
 with no login, browse what's cooking, order from any chef, and see what they owe
-each chef separately.
+each chef separately. Each chef gets a calendar of what she earned, day by day.
+
+Live at **https://vaniabhagania.github.io/SRN/**
 
 ---
 
@@ -12,112 +14,123 @@ each chef separately.
 
 | File | What it is |
 |---|---|
-| `index.html` | The whole app — markup, styles and logic in one file. No build step, no dependencies. |
+| `index.html` | The whole app. One file, no build step. |
+| `schema.sql` | Database tables and security rules. Run once in Supabase. |
 | `assets/` | The SRN Kitchen seal at a few sizes. |
 
-Open `index.html` in a browser and it runs. That's the whole deal.
+---
+
+## Going live — about ten minutes
+
+Until you do this, the app works but keeps everything on one device: a dish
+Shobha posts on her phone won't reach a customer's. These steps give all three
+chefs and every customer the same live data.
+
+**1. Make a Supabase project.** [supabase.com](https://supabase.com) → new
+project. The free tier is enough. Pick a region near Bengaluru (Mumbai or
+Singapore).
+
+**2. Create the tables.** In the project: SQL Editor → New query → paste the
+whole of `schema.sql` → Run. That makes the tables, locks them down, and adds
+the three chefs.
+
+**3. Make a login for each chef.** Authentication → Users → Add user, ticking
+**Auto Confirm User**:
+
+| Email | Password |
+|---|---|
+| `shobha@srnkitchen.app` | Shobha's 6-digit PIN |
+| `ramya@srnkitchen.app` | Ramya's 6-digit PIN |
+| `neha@srnkitchen.app` | Neha's 6-digit PIN |
+
+The chefs never type these addresses — they just tap their name and enter the
+PIN. The address is only how the login is stored.
+
+Then copy each new user's UID and link it to her chef row (SQL Editor):
+
+```sql
+update chefs set auth_uid = '<UID for shobha>' where id = 'shobha';
+update chefs set auth_uid = '<UID for ramya>'  where id = 'ramya';
+update chefs set auth_uid = '<UID for neha>'   where id = 'neha';
+```
+
+**4. Make a place for dish photos.** Storage → New bucket → name it
+`dish-photos` → tick **Public bucket**.
+
+**5. Point the app at it.** Settings → API gives you a Project URL and an
+`anon` `public` key. Put both into the top of the `<script>` in `index.html`:
+
+```js
+var CFG = {
+  SUPABASE_URL: "https://xxxxxxxxxxxx.supabase.co",
+  SUPABASE_ANON_KEY: "eyJhbGciOi..."
+};
+```
+
+Commit and push. GitHub Pages redeploys in a minute or two.
+
+The anon key is *meant* to be public — it identifies the project, it doesn't
+grant anything. What protects your data is the security rules in `schema.sql`:
+anyone may read the menu and place an order, but only a signed-in chef can post
+dishes or read a customer's name, phone and flat number.
 
 ---
 
 ## The two sides
 
-**Customer side** (opens by default, no sign-in)
+**Customer side** — opens by default, no sign-in
 
-- Today's dishes, grouped by chef
-- Filter by meal — Everything / Breakfast / Lunch / Dinner
-- Filter by Veg / Non-veg, with the standard green and brown-red mark on every dish
-- Add to the order, adjust quantities
+- Today's dishes grouped by chef, with the standard veg / non-veg mark
+- Filter by meal, and by veg or non-veg
 - Totals split per chef, so each chef is paid her own amount
-- Name, address and phone are taken at checkout
-- "Delivery charges are applicable, and to be paid at Delivery receive" appears in the
-  order summary, at checkout, and on the Contact tab
-- Finished orders are handed to each chef over WhatsApp, pre-filled
+- Checkout asks for name, phone, **apartment complex and flat number** — which
+  is how SRN actually delivers
+- "Delivery charges are applicable, and to be paid at Delivery receive" appears
+  in the order summary, at checkout, and on the Contact tab
+- The finished order goes to each chef on WhatsApp, pre-filled, as well as into
+  the app
 
-**Chef side** (the Chef tab)
+**Chef side** — tap Chef, pick your name, enter your PIN
 
-- Sign in by picking your name and entering a PIN
-- Post a dish: name, description, price, meal slot, veg/non-veg, optional photo
-- Photos are resized in the browser before they're stored
-- Edit a price, take a dish off the menu, or remove it
-- "Cooked by" defaults to your name and can be changed per dish
-- One switch closes your counter — your dishes grey out and stop being orderable
-- Orders recorded in the app show under Orders
+- **Dishes** — edit a price, take a dish off the menu, remove it
+- **Add** — name, description, price, meal, veg or non-veg, optional photo
+- **Orders** — who ordered what, with their flat number and a tap-to-call number
+- **Earnings** — a month calendar. Each day shows what *you* earned; tap a date
+  for that day's total and the orders behind it. A shared order counts only your
+  share, never the whole bill.
 
-**Reviews and Contact** are tabs of their own. Reviews take a 1–5 rating, an optional
-note and emoji. Contact lists all three numbers; tapping one dials, and there's a copy
-button beside it for phones that don't pick up `tel:` links.
+The switch at the top of the chef screen closes your counter: your dishes grey
+out for customers and stop being orderable, without deleting anything.
 
 ---
 
-## Chefs, numbers and PINs
+## Changing things
 
-The roster lives in one block at the top of the `<script>` in `index.html`:
+**Chefs, phone numbers, delivery complexes** — the three config blocks at the
+top of the `<script>` in `index.html`:
 
 ```js
-var CHEFS = [
-  { id: "shobha", name: "Shobha", phone: "919800373577", pin: "1001" },
-  { id: "ramya",  name: "Ramya",  phone: "918105177446", pin: "1002" },
-  { id: "neha",   name: "Neha",   phone: "919962506977", pin: "1003" }
-];
+var CHEFS  = [...];   // name and WhatsApp number per chef
+var TOWERS = [...];   // the complexes that appear in checkout
 ```
 
-Change a name, number or PIN there. Phone numbers are country code + number, digits only.
+Changing a chef's name here also means updating her row in the `chefs` table.
 
-**These PINs are not security.** They sit in the page source, so anyone who opens the
-app can read them. They keep an ordinary customer out of the kitchen screens; they do
-not keep out anyone determined. Treat the chef side as convenience, not a locked door,
-until there's a real backend (below).
-
----
-
-## Where the data goes — read this before you launch
-
-The app stores dishes, reviews and orders in whichever of these it finds:
-
-1. **Claude artifact database** — when the page runs as a published Claude artifact.
-   Shared across everyone who opens it.
-2. **`localStorage`** — the fallback everywhere else, including GitHub Pages.
-   **Data stays on the one device that entered it.**
-
-That second case is the thing to understand. If you deploy this file as-is to GitHub
-Pages, a dish Shobha posts on her phone is saved *on her phone*. A customer opening the
-same link sees an empty menu. The app works, but each device is its own island.
-
-For a real launch you need a backend the devices share. The code is written so this is a
-contained change — every read and write goes through the `Store` object, so a third
-adapter alongside the two there is the whole job. Supabase or Firebase both fit; the
-shape you'd need is:
-
-- `chefs` — id, name, open
-- `dishes` — id, chefId, chefName, name, note, price, slot, diet, available, createdAt
-- `dishimages` — id (same as the dish), data
-- `reviews` — id, name, rating, text, createdAt
-- `orders` — id, customer {name, phone, address}, items[], grand, placedAt
-
-Move the PIN check server-side at the same time, and the chef side becomes a real login.
+**Colours and type** — every colour is a token in the `:root` block at the top
+of the stylesheet. They come from the logo: the forest green of the ring, the
+amber of the "crafted with care" script, and a warm cream ground. Marcellus sets
+the headings to match the lettering on the seal; Karla carries the interface.
+Light and dark are both defined, and the button in the header switches them.
 
 ---
 
-## Deploying
+## Known limits
 
-**GitHub Pages** — Settings → Pages → Deploy from branch → `main` / root.
-It'll be live at `https://vaniabhagania.github.io/srn/`.
-
-**Anywhere else** — upload `index.html` and `assets/`. Any static host works:
-Netlify, Vercel, Cloudflare Pages.
-
-Add it to a phone home screen from the browser's share menu and it opens full-screen,
-like an app.
-
----
-
-## Design
-
-Colours are taken from the logo: the deep forest green of the ring, the amber of the
-"crafted with care" script, and a warm cream ground. Marcellus (an inscriptional roman)
-sets the headings, matching the lettering on the seal; Karla carries the interface text.
-Light and dark themes are both defined, and the button in the header switches between
-them.
-
-Every colour is a token in the `:root` block at the top of the stylesheet. Change them
-there and the whole app follows.
+- **Anyone can place an order**, including a bot, since customers don't log in.
+  Fine at this size; if it ever gets abused, add a captcha or require a phone
+  confirmation.
+- **The calendar only knows about orders placed in the app.** Anything that came
+  through WhatsApp has to go in by hand, with the "Add earnings for a past day"
+  button.
+- **Payments aren't tracked.** Each chef collects her own, as now. The app shows
+  what is owed, not what has been received.
