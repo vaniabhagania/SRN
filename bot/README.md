@@ -33,8 +33,9 @@ participants, and SRN Kitchen has around 250.
 
 **1. Get the files onto a server**
 
-Any machine that stays on. A free Railway or Fly tier is enough; so is the
-smallest VPS. It needs Node 20 or newer.
+Any machine that stays on, running Node 20 or newer. See
+[Putting it on Oracle Cloud](#putting-it-on-oracle-cloud) below for a free
+one that doesn't sleep or expire.
 
 ```bash
 git clone https://github.com/vaniabhagania/SRN
@@ -85,8 +86,109 @@ Once the log looks right:
 npm start
 ```
 
-On Railway or Fly, set the start command to `npm start` and keep the `auth`
-folder on a persistent volume, or it will ask for the QR again every deploy.
+That runs it in your terminal, which stops the moment you close it. See
+[Keeping it running](#keeping-it-running) for making it survive a logout
+and a reboot.
+
+---
+
+## Putting it on Oracle Cloud
+
+Oracle's Always Free tier suits this well: it doesn't sleep, doesn't expire,
+and needs no card charge. It was cut back in 2026 — the free ARM allowance
+dropped from 4 cores / 24GB to around **2 vCPU / 12GB**, and going over can
+now be billed rather than simply refused. Still far more than this needs; the
+listener is one Node process holding a websocket and is happy on 1 core and
+512MB.
+
+**Make the machine**
+
+1. Sign up at [cloud.oracle.com](https://cloud.oracle.com). Pick a region near
+   you (Mumbai or Hyderabad for India) — you cannot change it later.
+2. **Set a budget alert first.** Billing → Budgets → create one for ₹1 so you
+   hear about it immediately if anything ever falls outside the free
+   allowance. Do this before creating the instance.
+3. Compute → Instances → Create instance.
+   - Image: **Ubuntu 22.04** or newer
+   - Shape: **VM.Standard.A1.Flex** with 1 OCPU and 6GB — well inside the free
+     allowance. If it says *out of capacity*, which is common for ARM, use
+     **VM.Standard.E2.1.Micro** instead; 1GB is plenty here.
+   - Save the SSH key it offers. You cannot get it again.
+4. Connect: `ssh ubuntu@<the public IP>`
+
+**No firewall holes needed.** The listener only makes outbound connections —
+to WhatsApp and to Supabase. Leave the ingress rules alone; it needs nothing
+open.
+
+**Install and set up**
+
+```bash
+sudo apt update && sudo apt install -y nodejs npm git
+sudo npm install -g n && sudo n 20          # Ubuntu ships an older Node
+hash -r
+
+git clone https://github.com/vaniabhagania/SRN
+cd SRN/bot
+npm install
+nano config.js                               # list your groups
+npm run dry                                  # scan the QR, watch the log
+```
+
+Scan the QR from the listener's phone, leave it an evening, read the output.
+
+---
+
+## Keeping it running
+
+`npm start` dies when you close the terminal. `systemd` keeps it alive through
+logouts, crashes and reboots. A unit file is included:
+
+```bash
+sudo cp srn-listener.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now srn-listener
+```
+
+Then:
+
+```bash
+journalctl -u srn-listener -f        # watch it live
+sudo systemctl restart srn-listener  # after changing config.js
+sudo systemctl stop srn-listener     # turn it off
+sudo systemctl status srn-listener   # is it alive?
+```
+
+Edit the paths in the unit file if you cloned somewhere other than
+`/home/ubuntu/SRN/bot`. To run in dry-run under systemd, uncomment the
+`DRY_RUN` line in it and restart.
+
+**Link the phone before enabling the service.** The QR appears in the journal
+rather than your terminal, which is awkward to scan. Run `npm run dry` once by
+hand, scan it, confirm it connects, then hand over to systemd — the session in
+`auth/` carries across.
+
+---
+
+## Looking after it
+
+**Back up `auth/`.** It is the linked-device session. Lose it and you re-scan
+the QR; leak it and someone else is signed in as that WhatsApp account. Treat
+it like a password:
+
+```bash
+tar czf ~/srn-auth-backup.tgz auth/
+```
+
+**Supabase pauses free projects after a stretch of no activity.** With the
+listener writing daily that will not come up, but if the kitchen goes quiet for
+a couple of weeks, check the project is awake before assuming something broke.
+
+**Updating:**
+
+```bash
+cd ~/SRN && git pull && cd bot && npm install
+sudo systemctl restart srn-listener
+```
 
 ---
 
@@ -142,6 +244,14 @@ actually use.
 
 **It stops seeing messages but stays connected** — restart it. WhatsApp
 occasionally drops a linked device quietly.
+
+**Oracle says "out of capacity"** — the free ARM shapes are heavily contended.
+Either try a different availability domain in the same region, or take
+`VM.Standard.E2.1.Micro` instead, which is almost always free to create and
+quite enough for this.
+
+**It was running and now isn't** — `journalctl -u srn-listener -n 50` shows the
+last 50 lines, which usually says why.
 
 ---
 

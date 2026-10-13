@@ -1,0 +1,45 @@
+# Keeps the listener running: starts on boot, restarts if it dies.
+#
+#   sudo cp srn-listener.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now srn-listener
+#
+# Change User and the paths below if you put it somewhere other than
+# /home/ubuntu/SRN/bot.
+
+[Unit]
+Description=SRN Kitchen WhatsApp listener
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/SRN/bot
+# env finds node wherever it was installed — apt puts it in /usr/bin, n and
+# nvm in /usr/local/bin, and systemd's PATH covers both.
+ExecStart=/usr/bin/env node index.js
+
+# Come back up after a crash, but not in a tight loop if it's failing hard.
+Restart=always
+RestartSec=10
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+# Logs go to the journal: journalctl -u srn-listener -f
+StandardOutput=journal
+StandardError=journal
+
+Environment=NODE_ENV=production
+# Uncomment to read and log without writing anything:
+# Environment=DRY_RUN=1
+
+# It only needs its own folder and the network.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/SRN/bot
+
+[Install]
+WantedBy=multi-user.target
