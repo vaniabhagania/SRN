@@ -157,6 +157,12 @@ button{ cursor:pointer; background:none; border:none; padding:0 }
 }
 .badge.closed{ background:var(--warn-soft); color:var(--warn) }
 .badge.open{ background:var(--ok-soft); color:var(--ok) }
+.badge.paid{ background:var(--ok-soft); color:var(--ok) }
+.badge.unpaid{
+  background:color-mix(in srgb, var(--nonveg) 13%, transparent);
+  color:var(--nonveg); border:1px solid color-mix(in srgb, var(--nonveg) 35%, transparent);
+}
+button.badge{ cursor:pointer }
 
 /* ---------- dish card ---------- */
 .dish{
@@ -754,9 +760,33 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
 var WA = (function () {
   "use strict";
 
+  /* Who in the chat is which chef. "Mom" is how Neha appears in the group. */
+  var CHEF_BY_CHAT_NAME = {
+    "mom": "neha",
+    "neha": "neha",
+    "shobha": "shobha",
+    "ramya": "ramya"
+  };
+
   /* People who run the kitchen. Their messages are menus and
      announcements, never customer orders. */
-  var ADMINS = /^(mom|shobha|ramya|neha|shobha aunty|ramya aunty|neha aunty|deepti aunty|vania|vinod uncle)$/i;
+  var ADMINS = /^(mom|shobha|ramya|neha|deepti|vania|vinod)$/i;
+
+  /* WhatsApp shows saved contacts as they're stored — "Shobha aunty",
+     "Vinod uncle". Drop the honorific so the name reads as a name. */
+  function cleanName(raw) {
+    var n = String(raw || "").trim();
+    n = n.replace(/\s*[\(\[].*?[\)\]]\s*$/, "");                 // "Asha (Olive)"
+    n = n.replace(/\s+(aunty|auntie|aunt|uncle|anna|akka|bhaiya|didi|ji|sir|madam|ma'?am)\s*$/i, "");
+    n = n.replace(/^(mr|mrs|ms|dr)\.?\s+/i, "");
+    n = n.replace(/\s{2,}/g, " ").trim();
+    return n || String(raw || "").trim();
+  }
+
+  /* Which chef a chat name belongs to, or null for a customer. */
+  function chefFor(rawName) {
+    return CHEF_BY_CHAT_NAME[cleanName(rawName).toLowerCase()] || null;
+  }
 
   /* Lines WhatsApp itself writes. */
   var SYSTEM = /(joined using this group's invite|added you|created group|changed the subject|changed this group's icon|messages and calls are end-to-end encrypted|security code changed|deleted this message|this message was deleted|<Media omitted>|image omitted|video omitted|sticker omitted|document omitted|null)/i;
@@ -950,13 +980,18 @@ var WA = (function () {
     var orders = [], payments = [], reviews = [], skipped = 0;
 
     msgs.forEach(function (m) {
-      var fromAdmin = ADMINS.test(m.sender);
+      var who = cleanName(m.sender);
+      var fromAdmin = ADMINS.test(who);
 
       var pay = findPayment(m.text);
       if (pay && !fromAdmin) {
+        /* "Sent to Mom" tells us which chef was paid */
+        var toChef = null;
+        var sentTo = m.text.match(/sent to\s+([A-Za-z][A-Za-z .]{1,24})/i);
+        if (sentTo) toChef = chefFor(sentTo[1]);
         payments.push({
-          at: m.date, who: m.sender,
-          amount: pay.amount, confirmed: pay.confirmed, text: m.text.slice(0, 200)
+          at: m.date, who: who, amount: pay.amount, confirmed: pay.confirmed,
+          toChef: toChef, text: m.text.slice(0, 200)
         });
         return;
       }
@@ -965,14 +1000,14 @@ var WA = (function () {
       /* praise first — "the biryani was delicious" is not an order */
       var rev = findReview(m.text);
       if (rev) {
-        reviews.push({ at: m.date, who: m.sender, rating: rev.rating, body: rev.body });
+        reviews.push({ at: m.date, who: who, rating: rev.rating, body: rev.body });
         return;
       }
 
       var items = findItems(m.text);
       if (items.length) {
         orders.push({
-          at: m.date, who: m.sender, items: items,
+          at: m.date, who: who, items: items,
           flat: findFlat(m.text), tower: findTower(m.text),
           meal: findMeal(m.text), text: m.text.slice(0, 220)
         });
@@ -987,7 +1022,8 @@ var WA = (function () {
 
   return { parse: parse, parseLine: parseLine, toMessages: toMessages,
            findItems: findItems, findFlat: findFlat, findTower: findTower,
-           findMeal: findMeal, findPayment: findPayment };
+           findMeal: findMeal, findPayment: findPayment,
+           cleanName: cleanName, chefFor: chefFor };
 })();
 </script>
 
@@ -1250,6 +1286,19 @@ var WA = (function () {
     recentOrders: function () {
       var from = new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString();
       return this.ordersBetween(from, new Date(Date.now() + 86400000).toISOString());
+    },
+    setPaid: function (id, paid) {
+      var patch = { paid: !!paid, paid_at: paid ? new Date().toISOString() : null };
+      if (this.mode === "supabase") {
+        return this.sb.from("orders").update(patch).eq("id", id).then(thrower);
+      }
+      if (this.mode === "claude") {
+        return this.cdb.collection("private/inbox/orders").doc(String(id)).update(patch);
+      }
+      var rows = lsGet("srn_orders", []);
+      var i = rows.findIndex(function (r) { return String(r.id) === String(id); });
+      if (i >= 0) { rows[i] = Object.assign(rows[i], patch); lsSet("srn_orders", rows); }
+      return Promise.resolve();
     },
 
     /* ---- reviews ---- */
@@ -1919,6 +1968,40 @@ var WA = (function () {
     }).join("");
   }
 
+  /* Tap to flip between paid and not paid. */
+  function paidBadge(o) {
+    return o.paid
+      ? '<button class="badge paid" data-paid="' + esc(o.id) + '" data-to="0" title="Mark as not paid">Paid</button>'
+      : '<button class="badge unpaid" data-paid="' + esc(o.id) + '" data-to="1" title="Mark as paid">Not paid</button>';
+  }
+
+  /* The same order can sit in two places — the Orders list and the day the
+     calendar is showing. Flip it wherever it appears. */
+  function eachCopyOf(id, fn) {
+    state.orders.forEach(function (o) { if (String(o.id) === String(id)) fn(o); });
+    Object.keys(state.cal.ordersByDay).forEach(function (k) {
+      state.cal.ordersByDay[k].forEach(function (r) {
+        if (r.order && String(r.order.id) === String(id)) fn(r.order);
+      });
+    });
+  }
+
+  function setPaid(id, paid) {
+    eachCopyOf(id, function (o) {
+      o.paid = paid;
+      o.paid_at = paid ? new Date().toISOString() : null;
+    });
+    renderOrders();
+    if (state.sub === "earn") renderDayPanel();
+
+    DB.setPaid(id, paid).catch(function () {
+      eachCopyOf(id, function (o) { o.paid = !paid; });
+      renderOrders();
+      if (state.sub === "earn") renderDayPanel();
+      toast("Couldn't save that. Check your connection.");
+    });
+  }
+
   function renderOrders() {
     var box = $("#orderList"), c = me();
     if (!c) return;
@@ -1929,16 +2012,30 @@ var WA = (function () {
       box.innerHTML = '<div class="note plain">No orders yet. Orders customers place in the app show up here; anything sent straight to your WhatsApp will not.</div>';
       return;
     }
-    box.innerHTML = mine.map(function (o) {
+
+    var owed = mine.filter(function (o) { return !o.paid; })
+      .reduce(function (s, o) {
+        return s + o.items.filter(function (i) { return i.chef_id === c.id; })
+          .reduce(function (a, i) { return a + Number(i.amount || 0); }, 0);
+      }, 0);
+    var head = owed > 0
+      ? '<div class="note warn" style="margin-bottom:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/></svg>' +
+        "<span><b>" + money(owed) + "</b> still to come in across " +
+        mine.filter(function (o) { return !o.paid; }).length + " orders. Tap a badge once the money arrives.</span></div>"
+      : '<div class="note plain" style="margin-bottom:14px">Everything here is paid for.</div>';
+
+    box.innerHTML = head + mine.map(function (o) {
       var items = o.items.filter(function (i) { return i.chef_id === c.id; });
       var tot = items.reduce(function (s, i) { return s + Number(i.amount || 0); }, 0);
       return '<div class="order"><div class="order-head"><strong>' + esc(o.customer_name) + "</strong>" +
         '<span class="when">' + esc(when(o.placed_at)) + "</span>" +
-        '<span class="price tnum" style="margin-left:auto">' + money(tot) + "</span></div><ul>" +
+        '<span class="price tnum" style="margin-left:auto">' + money(tot) + "</span></div>" +
+        '<div style="margin:2px 0 7px">' + paidBadge(o) + "</div><ul>" +
         items.map(function (i) { return "<li>" + esc(i.name) + " ×" + i.qty + " — " + money(i.amount) + "</li>"; }).join("") +
         '</ul><p class="addr">' + esc(o.tower) + ", flat " + esc(o.flat) +
         (o.note ? "<br>" + esc(o.note) : "") +
-        '<br><a href="tel:+91' + esc(o.phone) + '" style="color:var(--accent-ink)">' + esc(o.phone) + "</a></p></div>";
+        (o.phone ? '<br><a href="tel:+91' + esc(o.phone) + '" style="color:var(--accent-ink)">' + esc(o.phone) + "</a>" : "") +
+        "</p></div>";
     }).join("");
   }
 
@@ -2095,7 +2192,8 @@ var WA = (function () {
       var o = r.order;
       return '<div class="dayorder"><div class="dayorder-head"><strong>' + esc(o.customer_name) + "</strong>" +
         '<span class="where">' + esc(o.tower) + " · " + esc(o.flat) + "</span>" +
-        '<span class="amt tnum">' + money(r.amount) + "</span></div><ul>" +
+        '<span class="amt tnum">' + money(r.amount) + "</span></div>" +
+        '<div style="margin:3px 0 2px">' + paidBadge(o) + "</div><ul>" +
         r.items.map(function (i) {
           return "<li>" + esc(i.name) + " ×" + i.qty + " — " + money(i.amount) + "</li>";
         }).join("") + "</ul></div>";
@@ -2218,8 +2316,13 @@ var WA = (function () {
           '<span class="meta">' + p.at.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) + "</span>" +
           '<span class="price tnum" style="margin-left:auto;font-size:15px">' + money(p.amount) + "</span></div>" +
           '<div class="raw">“' + esc(p.text) + '”</div>' +
-          '<div class="fields"><select data-pchef="' + i + '">' + chefOptions + "</select></div>" +
-          "</div></div>";
+          '<div class="fields"><select data-pchef="' + i + '">' +
+          state.chefs.map(function (c) {
+            var sel = p.toChef ? c.id === p.toChef : (mine && c.id === mine.id);
+            return '<option value="' + esc(c.id) + '"' + (sel ? " selected" : "") + ">" + esc(c.name) + "</option>";
+          }).join("") + "</select>" +
+          (p.toChef ? '<span class="muted" style="font-size:11.5px;align-self:center">from “sent to”</span>' : "") +
+          "</div></div></div>";
       });
       html += "</div>";
     }
@@ -2244,6 +2347,13 @@ var WA = (function () {
       var chef = ($('[data-ochef="' + i + '"]') || {}).value || (me() || {}).id;
       var amt = Number(($('[data-oamt="' + i + '"]') || {}).value || 0) || 0;
       var per = o.items.length ? amt / o.items.length : 0;
+
+      /* If the same person sent money in the chat within a day either side,
+         call it paid. The chef can flip it back in one tap. */
+      var paid = imported.payments.some(function (p) {
+        return p.who === o.who && Math.abs(p.at - o.at) < 36 * 3600 * 1000;
+      });
+
       jobs.push(DB.createOrder({
         customer_name: o.who,
         phone: "",
@@ -2255,6 +2365,8 @@ var WA = (function () {
                    price: it.qty ? per / it.qty : 0, amount: per };
         }),
         grand: amt,
+        paid: paid,
+        paid_at: paid ? o.at.toISOString() : null,
         placed_at: o.at.toISOString()
       }).then(function () { counts.orders++; }));
     });
@@ -2272,7 +2384,7 @@ var WA = (function () {
 
     $$('[data-imp="payments"]:checked').forEach(function (cb) {
       var i = +cb.dataset.i, p = imported.payments[i];
-      var chef = ($('[data-pchef="' + i + '"]') || {}).value || (me() || {}).id;
+      var chef = ($('[data-pchef="' + i + '"]') || {}).value || p.toChef || (me() || {}).id;
       jobs.push(DB.addManual({
         chef_id: chef, day: dayKey(p.at), amount: Math.round(p.amount),
         note: "WhatsApp · " + p.who
@@ -2363,8 +2475,10 @@ var WA = (function () {
       "[data-chef],[data-chefpage],[data-star],[data-emoji],[data-copy],[data-del],[data-toggle]," +
       "[data-editprice],[data-day],[data-saveprice],#viewCart,#sheetClose,#sheetScrim,#toDetails," +
       "#openReview,#submitReview,#doneOrder,#loginBtn,#logoutBtn,#themeBtn,#calPrev,#calNext," +
-      "#addManual,#backToMenu,#doImport,[data-impall],[data-impnone]");
+      "#addManual,#backToMenu,#doImport,[data-impall],[data-impnone],[data-paid]");
     if (!t) return;
+
+    if (t.dataset.paid) return setPaid(t.dataset.paid, t.dataset.to === "1");
 
     if (t.id === "doImport") return runImport();
     if (t.dataset.impall || t.dataset.impnone) {

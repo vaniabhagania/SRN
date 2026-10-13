@@ -6,9 +6,33 @@
 var WA = (function () {
   "use strict";
 
+  /* Who in the chat is which chef. "Mom" is how Neha appears in the group. */
+  var CHEF_BY_CHAT_NAME = {
+    "mom": "neha",
+    "neha": "neha",
+    "shobha": "shobha",
+    "ramya": "ramya"
+  };
+
   /* People who run the kitchen. Their messages are menus and
      announcements, never customer orders. */
-  var ADMINS = /^(mom|shobha|ramya|neha|shobha aunty|ramya aunty|neha aunty|deepti aunty|vania|vinod uncle)$/i;
+  var ADMINS = /^(mom|shobha|ramya|neha|deepti|vania|vinod)$/i;
+
+  /* WhatsApp shows saved contacts as they're stored — "Shobha aunty",
+     "Vinod uncle". Drop the honorific so the name reads as a name. */
+  function cleanName(raw) {
+    var n = String(raw || "").trim();
+    n = n.replace(/\s*[\(\[].*?[\)\]]\s*$/, "");                 // "Asha (Olive)"
+    n = n.replace(/\s+(aunty|auntie|aunt|uncle|anna|akka|bhaiya|didi|ji|sir|madam|ma'?am)\s*$/i, "");
+    n = n.replace(/^(mr|mrs|ms|dr)\.?\s+/i, "");
+    n = n.replace(/\s{2,}/g, " ").trim();
+    return n || String(raw || "").trim();
+  }
+
+  /* Which chef a chat name belongs to, or null for a customer. */
+  function chefFor(rawName) {
+    return CHEF_BY_CHAT_NAME[cleanName(rawName).toLowerCase()] || null;
+  }
 
   /* Lines WhatsApp itself writes. */
   var SYSTEM = /(joined using this group's invite|added you|created group|changed the subject|changed this group's icon|messages and calls are end-to-end encrypted|security code changed|deleted this message|this message was deleted|<Media omitted>|image omitted|video omitted|sticker omitted|document omitted|null)/i;
@@ -202,13 +226,18 @@ var WA = (function () {
     var orders = [], payments = [], reviews = [], skipped = 0;
 
     msgs.forEach(function (m) {
-      var fromAdmin = ADMINS.test(m.sender);
+      var who = cleanName(m.sender);
+      var fromAdmin = ADMINS.test(who);
 
       var pay = findPayment(m.text);
       if (pay && !fromAdmin) {
+        /* "Sent to Mom" tells us which chef was paid */
+        var toChef = null;
+        var sentTo = m.text.match(/sent to\s+([A-Za-z][A-Za-z .]{1,24})/i);
+        if (sentTo) toChef = chefFor(sentTo[1]);
         payments.push({
-          at: m.date, who: m.sender,
-          amount: pay.amount, confirmed: pay.confirmed, text: m.text.slice(0, 200)
+          at: m.date, who: who, amount: pay.amount, confirmed: pay.confirmed,
+          toChef: toChef, text: m.text.slice(0, 200)
         });
         return;
       }
@@ -217,14 +246,14 @@ var WA = (function () {
       /* praise first — "the biryani was delicious" is not an order */
       var rev = findReview(m.text);
       if (rev) {
-        reviews.push({ at: m.date, who: m.sender, rating: rev.rating, body: rev.body });
+        reviews.push({ at: m.date, who: who, rating: rev.rating, body: rev.body });
         return;
       }
 
       var items = findItems(m.text);
       if (items.length) {
         orders.push({
-          at: m.date, who: m.sender, items: items,
+          at: m.date, who: who, items: items,
           flat: findFlat(m.text), tower: findTower(m.text),
           meal: findMeal(m.text), text: m.text.slice(0, 220)
         });
@@ -239,7 +268,8 @@ var WA = (function () {
 
   return { parse: parse, parseLine: parseLine, toMessages: toMessages,
            findItems: findItems, findFlat: findFlat, findTower: findTower,
-           findMeal: findMeal, findPayment: findPayment };
+           findMeal: findMeal, findPayment: findPayment,
+           cleanName: cleanName, chefFor: chefFor };
 })();
 
 if (typeof module !== "undefined") module.exports = WA;

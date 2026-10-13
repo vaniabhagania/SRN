@@ -47,9 +47,16 @@ create table if not exists orders (
   note          text default '',
   items         jsonb not null,
   grand         numeric(10,2) not null,
+  paid          boolean not null default false,
+  paid_at       timestamptz,
   placed_at     timestamptz not null default now()
 );
 create index if not exists orders_placed_idx on orders(placed_at desc);
+
+-- Upgrading from an earlier version? These add the payment columns without
+-- touching existing rows. Safe to run more than once.
+alter table orders add column if not exists paid    boolean not null default false;
+alter table orders add column if not exists paid_at timestamptz;
 
 -- -------------------------------------------------------------- reviews ----
 create table if not exists reviews (
@@ -123,6 +130,11 @@ create policy orders_insert_any on orders for insert with check (true);
 drop policy if exists orders_read_chefs on orders;
 create policy orders_read_chefs on orders for select
   using (auth.uid() is not null);
+
+-- a signed-in chef marks an order paid or unpaid
+drop policy if exists orders_update_chefs on orders;
+create policy orders_update_chefs on orders for update
+  using (auth.uid() is not null) with check (auth.uid() is not null);
 
 -- reviews: anyone may post and read
 drop policy if exists reviews_insert_any on reviews;
