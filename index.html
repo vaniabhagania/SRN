@@ -422,6 +422,25 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
 .dayorder-head .amt{ margin-left:auto; font-weight:700; font-size:15px }
 .dayorder ul{ margin:4px 0 0; padding-left:16px; font-size:13.5px; color:var(--ink-soft); line-height:1.6 }
 
+/* ---------- payments the sync spotted ---------- */
+.pend{
+  border:1px solid var(--accent); border-radius:var(--radius); background:var(--accent-soft);
+  padding:12px 13px; margin-bottom:11px;
+}
+.pend-head{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; font-size:14.5px; color:var(--accent-ink) }
+.pend-head svg{ width:17px; height:17px; flex:none }
+.pend-head strong{ font-weight:700 }
+.pend-head .when{ font-size:12px; opacity:.75; margin-left:auto }
+.pend-src{ font-size:12.5px; color:var(--accent-ink); opacity:.8; margin:5px 0 9px }
+.pend-none{ font-size:13px; color:var(--accent-ink); opacity:.85; margin:0 0 9px }
+.pend-match{
+  display:flex; align-items:center; gap:9px; padding:8px 10px; margin-bottom:6px;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm);
+}
+.pend-match .nm{ flex:1; min-width:0; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.pend-match .amt{ font-weight:700; font-size:14px; white-space:nowrap }
+.pend-acts{ display:flex; justify-content:flex-end; margin-top:4px }
+
 /* ---------- import ---------- */
 .howto{ border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--surface); padding:10px 13px }
 .howto summary{ font-size:13.5px; font-weight:600; color:var(--accent-ink); cursor:pointer }
@@ -644,6 +663,7 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
       </div>
 
       <div id="sub-orders" hidden>
+        <div id="pendingList"></div>
         <div id="orderList"></div>
       </div>
 
@@ -1287,6 +1307,33 @@ var WA = (function () {
       var from = new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString();
       return this.ordersBetween(from, new Date(Date.now() + 86400000).toISOString());
     },
+    /* payments the hourly sync spotted in the chat but couldn't apply */
+    pendingPayments: function () {
+      if (this.mode === "supabase") {
+        return this.sb.from("pending_payments").select("*")
+          .eq("resolved", false).order("seen_at", { ascending: false })
+          .then(function (r) { return r.data || []; });
+      }
+      if (this.mode === "claude") {
+        return this._cList("private/inbox/pending").then(function (rows) {
+          return rows.filter(function (p) { return !p.resolved; });
+        });
+      }
+      return Promise.resolve(lsGet("srn_pending", []).filter(function (p) { return !p.resolved; }));
+    },
+    resolvePayment: function (id) {
+      if (this.mode === "supabase") {
+        return this.sb.from("pending_payments").update({ resolved: true }).eq("id", id).then(thrower);
+      }
+      if (this.mode === "claude") {
+        return this.cdb.collection("private/inbox/pending").doc(String(id)).update({ resolved: true });
+      }
+      var rows = lsGet("srn_pending", []);
+      var i = rows.findIndex(function (r) { return String(r.id) === String(id); });
+      if (i >= 0) { rows[i].resolved = true; lsSet("srn_pending", rows); }
+      return Promise.resolve();
+    },
+
     setPaid: function (id, paid) {
       var patch = { paid: !!paid, paid_at: paid ? new Date().toISOString() : null };
       if (this.mode === "supabase") {
@@ -1439,6 +1486,7 @@ var WA = (function () {
     loaded: false, pendingPhoto: null, newDiet: "veg",
     reviewDraft: { rating: 0 },
     chefPage: null,
+    pending: [],
     cal: { y: new Date().getFullYear(), m: new Date().getMonth(), day: null,
            byDay: {}, ordersByDay: {}, loading: false }
   };
@@ -2002,9 +2050,57 @@ var WA = (function () {
     });
   }
 
+  /* Normalise a name so "Neelu Talwar" and "neelu  talwar" match. */
+  function nameKey(s) {
+    return String(s || "").toLowerCase().replace(/[^a-z]/g, "");
+  }
+
+  /* Payments the sync saw in WhatsApp, each offered against that customer's
+     unpaid orders so the chef confirms rather than retypes. */
+  function renderPending() {
+    var box = $("#pendingList"), c = me();
+    if (!box || !c) return;
+    var rows = state.pending.filter(function (p) {
+      return !p.chef_id || p.chef_id === c.id;
+    });
+    if (!rows.length) { box.innerHTML = ""; return; }
+
+    box.innerHTML = rows.map(function (p) {
+      var mine = state.orders.filter(function (o) {
+        return !o.paid &&
+          o.items.some(function (i) { return i.chef_id === c.id; }) &&
+          nameKey(o.customer_name) === nameKey(p.who);
+      });
+      var amountText = p.amount ? money(p.amount) : "amount unclear";
+      var head = '<div class="pend"><div class="pend-head">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>' +
+        "<strong>" + esc(p.who) + "</strong> sent <b>" + esc(amountText) + "</b>" +
+        '<span class="when">' + esc(when(p.seen_at)) + "</span></div>" +
+        (p.source === "screenshot"
+          ? '<p class="pend-src">Read from a screenshot in the group — worth a glance before you confirm.</p>'
+          : '<p class="pend-src">Seen in the group chat.</p>');
+
+      if (!mine.length) {
+        return head + '<p class="pend-none">No unpaid order from that name. It may already be marked paid.</p>' +
+          '<div class="pend-acts"><button class="btn ghost sm" data-dismisspay="' + esc(p.id) + '">Dismiss</button></div></div>';
+      }
+      return head + mine.map(function (o) {
+        var tot = o.items.filter(function (i) { return i.chef_id === c.id; })
+          .reduce(function (s, i) { return s + Number(i.amount || 0); }, 0);
+        return '<div class="pend-match"><span class="nm">' +
+          esc(o.items.filter(function (i) { return i.chef_id === c.id; })
+            .map(function (i) { return i.name; }).join(", ")) +
+          '</span><span class="amt tnum">' + money(tot) + "</span>" +
+          '<button class="btn sm" data-paywith="' + esc(o.id) + '" data-pend="' + esc(p.id) + '">Mark paid</button></div>';
+      }).join("") +
+      '<div class="pend-acts"><button class="btn ghost sm" data-dismisspay="' + esc(p.id) + '">Not ours</button></div></div>';
+    }).join("");
+  }
+
   function renderOrders() {
     var box = $("#orderList"), c = me();
     if (!c) return;
+    renderPending();
     var mine = state.orders.filter(function (o) {
       return (o.items || []).some(function (i) { return i.chef_id === c.id; });
     });
@@ -2428,8 +2524,13 @@ var WA = (function () {
     $("#sub-earn").hidden = which !== "earn";
     $("#sub-import").hidden = which !== "import";
     if (which === "orders") {
-      DB.recentOrders().then(function (r) { state.orders = r; renderOrders(); })
-        .catch(function () { renderOrders(); });
+      Promise.all([
+        DB.recentOrders().catch(function () { return state.orders; }),
+        DB.pendingPayments().catch(function () { return []; })
+      ]).then(function (r) {
+        state.orders = r[0]; state.pending = r[1];
+        renderOrders();
+      });
     }
     if (which === "earn") loadMonth();
   }
@@ -2475,10 +2576,28 @@ var WA = (function () {
       "[data-chef],[data-chefpage],[data-star],[data-emoji],[data-copy],[data-del],[data-toggle]," +
       "[data-editprice],[data-day],[data-saveprice],#viewCart,#sheetClose,#sheetScrim,#toDetails," +
       "#openReview,#submitReview,#doneOrder,#loginBtn,#logoutBtn,#themeBtn,#calPrev,#calNext," +
-      "#addManual,#backToMenu,#doImport,[data-impall],[data-impnone],[data-paid]");
+      "#addManual,#backToMenu,#doImport,[data-impall],[data-impnone],[data-paid]," +
+      "[data-paywith],[data-dismisspay]");
     if (!t) return;
 
     if (t.dataset.paid) return setPaid(t.dataset.paid, t.dataset.to === "1");
+
+    if (t.dataset.paywith) {
+      var pid = t.dataset.pend;
+      setPaid(t.dataset.paywith, true);
+      state.pending = state.pending.filter(function (p) { return String(p.id) !== String(pid); });
+      renderPending();
+      DB.resolvePayment(pid).catch(function () {});
+      toast("Marked paid.");
+      return;
+    }
+    if (t.dataset.dismisspay) {
+      var did = t.dataset.dismisspay;
+      state.pending = state.pending.filter(function (p) { return String(p.id) !== String(did); });
+      renderPending();
+      DB.resolvePayment(did).catch(function () {});
+      return;
+    }
 
     if (t.id === "doImport") return runImport();
     if (t.dataset.impall || t.dataset.impnone) {

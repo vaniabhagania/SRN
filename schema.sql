@@ -74,6 +74,22 @@ create index if not exists reviews_chef_idx on reviews(chef_id);
 -- without touching what's in it. Safe to run more than once.
 alter table reviews add column if not exists chef_id text references chefs(id) on delete set null;
 
+-- ------------------------------------------- payments spotted in WhatsApp ----
+-- The hourly sync has no login, so it cannot mark an order paid itself.
+-- It drops what it saw here instead, and the chef confirms with one tap.
+create table if not exists pending_payments (
+  id        uuid primary key default gen_random_uuid(),
+  who       text not null,                 -- name as it appears in the chat
+  amount    numeric(10,2),                 -- null when it couldn't be read
+  chef_id   text references chefs(id) on delete set null,
+  source    text not null default 'text'
+            check (source in ('text','screenshot')),
+  raw       text default '',               -- the message, or what the image said
+  seen_at   timestamptz not null default now(),
+  resolved  boolean not null default false
+);
+create index if not exists pending_open_idx on pending_payments(resolved, seen_at desc);
+
 -- ----------------------------------------------- manually added earnings ----
 -- For days that were sold before the app existed, or cash taken outside it.
 create table if not exists manual_earnings (
@@ -92,11 +108,12 @@ create index if not exists manual_day_idx on manual_earnings(chef_id, day);
 -- The anon key ships inside the web page, so anyone can read it. These
 -- policies are what actually protect the data — not the key.
 -- ============================================================================
-alter table chefs           enable row level security;
-alter table dishes          enable row level security;
-alter table orders          enable row level security;
-alter table reviews         enable row level security;
-alter table manual_earnings enable row level security;
+alter table chefs            enable row level security;
+alter table dishes           enable row level security;
+alter table orders           enable row level security;
+alter table reviews          enable row level security;
+alter table manual_earnings  enable row level security;
+alter table pending_payments enable row level security;
 
 -- Is the caller the chef who owns this row?
 create or replace function is_chef(target text)
@@ -147,6 +164,19 @@ create policy reviews_read on reviews for select using (true);
 drop policy if exists manual_own on manual_earnings;
 create policy manual_own on manual_earnings for all
   using (is_chef(chef_id)) with check (is_chef(chef_id));
+
+-- pending payments: the sync writes them without a login; only a signed-in
+-- chef can see or clear them, so nobody browsing the site sees who paid what.
+drop policy if exists pending_insert_any on pending_payments;
+create policy pending_insert_any on pending_payments for insert with check (true);
+
+drop policy if exists pending_read_chefs on pending_payments;
+create policy pending_read_chefs on pending_payments for select
+  using (auth.uid() is not null);
+
+drop policy if exists pending_update_chefs on pending_payments;
+create policy pending_update_chefs on pending_payments for update
+  using (auth.uid() is not null) with check (auth.uid() is not null);
 
 -- ============================================================================
 -- Seed the roster
