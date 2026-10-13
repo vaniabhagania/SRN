@@ -57,9 +57,15 @@ create table if not exists reviews (
   name       text default '',
   rating     int not null check (rating between 1 and 5),
   body       text default '',
+  chef_id    text references chefs(id) on delete set null,  -- null = the kitchen in general
   created_at timestamptz not null default now()
 );
 create index if not exists reviews_recent_idx on reviews(created_at desc);
+create index if not exists reviews_chef_idx on reviews(chef_id);
+
+-- Already have a reviews table from an earlier version? This adds the column
+-- without touching what's in it. Safe to run more than once.
+alter table reviews add column if not exists chef_id text references chefs(id) on delete set null;
 
 -- ----------------------------------------------- manually added earnings ----
 -- For days that were sold before the app existed, or cash taken outside it.

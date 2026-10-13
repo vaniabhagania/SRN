@@ -120,6 +120,37 @@ button{ cursor:pointer; background:none; border:none; padding:0 }
 }
 .chefhead h3{ font-size:17px; letter-spacing:.03em; flex:1; min-width:0 }
 .chefhead .count{ font-size:12px; color:var(--ink-faint) }
+/* the chef's name opens her page */
+.cheflink{
+  display:flex; align-items:center; gap:8px; flex:1; min-width:0;
+  text-align:left; color:inherit; border-radius:7px; padding:2px 4px; margin:-2px -4px;
+}
+.cheflink h3{ flex:none }
+.cheflink .av{
+  width:27px; height:27px; flex:none; border-radius:50%; display:grid; place-items:center;
+  background:var(--accent-soft); color:var(--accent-ink);
+  font-family:var(--font-display); font-size:13px;
+}
+.cheflink .chev{ width:15px; height:15px; color:var(--ink-faint); flex:none }
+.cheflink:hover{ background:var(--surface-2) }
+
+/* ---------- one chef's page ---------- */
+.backlink{
+  display:inline-flex; align-items:center; gap:5px; margin-bottom:14px;
+  font-size:13.5px; font-weight:600; color:var(--ink-soft);
+}
+.backlink svg{ width:15px; height:15px }
+.chefhero{ display:flex; align-items:center; gap:14px; margin-bottom:8px }
+.chefhero .av{
+  width:62px; height:62px; flex:none; border-radius:50%; display:grid; place-items:center;
+  background:var(--accent-soft); color:var(--accent-ink);
+  font-family:var(--font-display); font-size:26px;
+}
+.chefhero .who{ min-width:0; flex:1 }
+.chefhero h2{ font-size:26px; letter-spacing:.01em; margin-bottom:3px }
+.chefhero .line{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; color:var(--ink-soft) }
+.chefacts{ display:flex; gap:8px; margin:16px 0 20px }
+.chefacts .btn{ flex:1 }
 .badge{
   font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
   padding:3px 8px; border-radius:999px; white-space:nowrap;
@@ -385,6 +416,45 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
 .dayorder-head .amt{ margin-left:auto; font-weight:700; font-size:15px }
 .dayorder ul{ margin:4px 0 0; padding-left:16px; font-size:13.5px; color:var(--ink-soft); line-height:1.6 }
 
+/* ---------- import ---------- */
+.howto{ border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--surface); padding:10px 13px }
+.howto summary{ font-size:13.5px; font-weight:600; color:var(--accent-ink); cursor:pointer }
+.howto ol{ margin:10px 0 2px; padding-left:19px; font-size:13.5px; color:var(--ink-soft); line-height:1.75 }
+.imgdrop .dropicon{
+  width:40px; height:40px; flex:none; border-radius:9px; display:grid; place-items:center;
+  background:var(--surface-3); color:var(--ink-faint);
+}
+.imgdrop .dropicon svg{ width:20px; height:20px }
+.tallies{ display:flex; gap:8px; margin-bottom:14px }
+.tally{
+  flex:1; min-width:0; padding:11px 9px; border-radius:var(--radius-sm);
+  background:var(--surface); border:1px solid var(--line); text-align:center;
+}
+.tally b{ display:block; font-family:var(--font-display); font-size:23px; line-height:1.1 }
+.tally span{ font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint) }
+.improw{
+  display:flex; gap:9px; padding:11px 0; border-bottom:1px solid var(--line); align-items:flex-start;
+}
+.improw:last-child{ border-bottom:none }
+.improw .pick{ flex:none; padding-top:2px }
+.improw .pick input{ width:18px; height:18px; accent-color:var(--accent) }
+.improw .d{ flex:1; min-width:0 }
+.improw .d .top{ display:flex; gap:7px; align-items:baseline; flex-wrap:wrap; margin-bottom:3px }
+.improw .d strong{ font-size:14.5px }
+.improw .d .meta{ font-size:12px; color:var(--ink-faint) }
+.improw .d ul{ margin:3px 0 0; padding-left:16px; font-size:13px; color:var(--ink-soft); line-height:1.6 }
+.improw .d .raw{ font-size:12px; color:var(--ink-faint); font-style:italic; margin-top:3px; word-break:break-word }
+.improw .fields{ display:flex; gap:6px; margin-top:7px; flex-wrap:wrap }
+.improw .fields select,.improw .fields input{ padding:6px 9px; font-size:13px; border-radius:7px; width:auto; flex:1; min-width:94px }
+.impsec{ margin-bottom:22px }
+.impsec h4{
+  margin:0 0 4px; font-family:var(--font-display); font-size:16px; font-weight:400;
+  display:flex; align-items:center; gap:8px;
+}
+.impsec .note{ margin-bottom:8px }
+.selectbar{ display:flex; gap:8px; align-items:center; margin:2px 0 8px; font-size:12.5px }
+.selectbar button{ font-size:12.5px; font-weight:600; color:var(--accent-ink) }
+
 /* ---------- misc ---------- */
 .toast{
   position:fixed; left:16px; right:16px; bottom:calc(140px + env(safe-area-inset-bottom,0px)); z-index:80;
@@ -433,6 +503,15 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
       <p class="tagline">SRN Kitchen presents to you homecooked, guilt-free food.</p>
       <p class="sub" id="emptySub">Our chefs haven't posted today's meals yet. Check back a little later.</p>
     </div>
+  </section>
+
+  <!-- ================= ONE CHEF ================= -->
+  <section class="view" id="v-chefpage" hidden>
+    <button class="backlink" id="backToMenu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      All chefs
+    </button>
+    <div id="chefPageBody"></div>
   </section>
 
   <!-- ================= REVIEWS ================= -->
@@ -501,6 +580,7 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
         <button role="tab" data-sub="add" aria-selected="false">Add</button>
         <button role="tab" data-sub="orders" aria-selected="false">Orders</button>
         <button role="tab" data-sub="earn" aria-selected="false">Earnings</button>
+        <button role="tab" data-sub="import" aria-selected="false">Import</button>
       </div>
 
       <div id="sub-dishes">
@@ -587,6 +667,35 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
         <button class="btn ghost full sm" id="addManual" style="margin-bottom:8px">Add earnings for a past day</button>
         <p class="muted" style="font-size:12px;line-height:1.5">Orders placed through the app are counted automatically. Use this for days sold before the app, or cash taken outside it.</p>
       </div>
+
+      <div id="sub-import" hidden>
+        <div class="viewhead">
+          <span class="eyebrow">From WhatsApp</span>
+          <h2 style="font-size:20px">Bring in the group's orders</h2>
+          <p class="muted" style="font-size:13.5px">Export the SRN Kitchen chat and drop the file here. Nothing is saved until you've looked at it and pressed import.</p>
+        </div>
+
+        <details class="howto">
+          <summary>How to export the chat</summary>
+          <ol>
+            <li>Open the SRN Kitchen group in WhatsApp on your phone.</li>
+            <li>Tap the group name at the top.</li>
+            <li>Scroll to the bottom and tap <b>Export chat</b>.</li>
+            <li>Choose <b>Without media</b>.</li>
+            <li>Send it to yourself, then open this page and pick the file.</li>
+          </ol>
+        </details>
+
+        <label class="imgdrop" for="waFile" style="margin:14px 0">
+          <span class="dropicon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M8 8l4-4 4 4M4 16v2.5A1.5 1.5 0 005.5 20h13a1.5 1.5 0 001.5-1.5V16"/></svg>
+          </span>
+          <span class="t" id="waFileLabel">Choose the exported chat file</span>
+        </label>
+        <input type="file" id="waFile" accept=".txt,.zip,text/plain,application/zip" hidden>
+
+        <div id="importResult"></div>
+      </div>
     </div>
   </section>
 </main>
@@ -635,6 +744,252 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
 </div>
 
 <div class="toast" id="toast" hidden></div>
+
+<script>
+/* ============================================================
+   WhatsApp export parser for SRN Kitchen
+   Shared by the in-app importer and the scraper.
+   ============================================================ */
+
+var WA = (function () {
+  "use strict";
+
+  /* People who run the kitchen. Their messages are menus and
+     announcements, never customer orders. */
+  var ADMINS = /^(mom|shobha|ramya|neha|shobha aunty|ramya aunty|neha aunty|deepti aunty|vania|vinod uncle)$/i;
+
+  /* Lines WhatsApp itself writes. */
+  var SYSTEM = /(joined using this group's invite|added you|created group|changed the subject|changed this group's icon|messages and calls are end-to-end encrypted|security code changed|deleted this message|this message was deleted|<Media omitted>|image omitted|video omitted|sticker omitted|document omitted|null)/i;
+
+  var DISH_WORDS = /biryani|briyani|paratha|parantha|kebab|kabab|custard|puff|ladoo|laddoo|ghujiya|gujiya|radha\s*ballavi|kofta|phulka|pav|bhaji|tikki|ghugni|vada|paneer|halwa|mutton|chicken|gatte|sabzi|curry|roti|rice|dal|idli|dosa|poha|upma|samosa|cutlet|roll|thali|meal|plate/i;
+
+  var MEALS = [
+    { re: /\bbreakfast\b/i,            slot: "breakfast" },
+    { re: /\blunch\b/i,                slot: "lunch" },
+    { re: /\b(dinner|supper)\b/i,      slot: "dinner" },
+    { re: /\b(evening|snack|snacks)\b/i, slot: "evening" }
+  ];
+
+  /* ---------- one line of an export ----------
+     Handles the shapes WhatsApp writes on iOS and Android:
+       [07/10/2026, 1:34:02 pm] Vinita: 250gm
+       07/10/2026, 13:34 - Vinita: 250gm
+       7/10/26, 1:34 pm - Vinita: 250gm
+     Returns null for a continuation line (part of the message above). */
+  function parseLine(line) {
+    var m = line.match(
+      /^‎?\[?(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([ap]\.?m\.?)?\]?\s*[-–]?\s*([^:]{1,60}?):\s?([\s\S]*)$/i
+    );
+    if (!m) return null;
+
+    var day = +m[1], mon = +m[2], yr = +m[3];
+    if (yr < 100) yr += 2000;
+    var hh = +m[4], mm = +m[5];
+    var ampm = (m[7] || "").toLowerCase().replace(/\./g, "");
+    if (ampm === "pm" && hh < 12) hh += 12;
+    if (ampm === "am" && hh === 12) hh = 0;
+
+    return {
+      date: new Date(yr, mon - 1, day, hh, mm, +(m[6] || 0)),
+      sender: m[8].trim(),
+      text: (m[9] || "").trim()
+    };
+  }
+
+  /* Group an export into messages, joining wrapped continuation lines. */
+  function toMessages(raw) {
+    var out = [];
+    String(raw).split(/\r?\n/).forEach(function (line) {
+      var p = parseLine(line);
+      if (p) out.push(p);
+      else if (out.length && line.trim()) {
+        out[out.length - 1].text += "\n" + line.trim();
+      }
+    });
+    return out.filter(function (m) { return m.text && !SYSTEM.test(m.text); });
+  }
+
+  /* A question is someone asking, not ordering. */
+  var QUESTION = /\?\s*$|^\s*(is|are|do|does|can|could|will|would|any|what|when|where|how|which|anyone|anybody)\b/i;
+
+  /* ---------- flat number ----------
+     Trailing 3-4 digits, "- 1174", "B-605", "For 1083 -", or "2012, 1 Chicken". */
+  function findFlat(text) {
+    var t = text.replace(/₹\s*[\d,]+/g, " ");           // drop money
+    t = t.replace(/\b\d{1,3}\s*(gm|gms|g|kg|ml|l)\b/gi, " ");// drop weights
+    t = t.replace(/\b[ap]\.?m\.?\b/gi, " ");
+
+    /* "B-605", "b 605", "B605" — a lone letter then the number */
+    var blk = t.match(/(?:^|\s)([A-Za-z])\s*[-–]?\s*(\d{2,4})\b/);
+    if (blk) return (blk[1] + "-" + blk[2]).toUpperCase();
+
+    var m =
+      t.match(/^\s*for\s+(\d{3,4})\b/i) ||                  // For 1083 - ...
+      t.match(/^\s*(\d{3,4})\s*,/) ||                       // 2012, 1 Chicken...
+      t.match(/[-–]\s*(\d{3,4})\b/) ||                 // - 1174
+      t.match(/\b(\d{3,4})\s*$/) ||                         // trailing 2104
+      t.match(/\b(\d{3,4})\b(?=\s*[,.]?\s*(heh|gg|olive|gopalan|sumadhura|raja|five))/i);
+    if (!m) return null;
+    /* No year check here on purpose: real flats in these towers are 2012,
+       2031, 2104 — rejecting "20xx" would throw away most of them. The
+       timestamp is already stripped by the line parser. */
+    return m[1].replace(/\s+/g, "").toUpperCase();
+  }
+
+  var TOWER_HINTS = [
+    { re: /\bheh\b|habitat\s*eden/i,        name: "Habitat Eden Heights" },
+    { re: /\bgg\b|gopalan/i,                name: "Gopalan Grandeur" },
+    { re: /\bolive\b/i,                     name: "Olive apartment" },
+    { re: /raja\s*ritz/i,                   name: "Raja Ritz" },
+    { re: /five\s*summit/i,                 name: "The Five Summits Address" },
+    { re: /sumadhura\s*nandanam|nandanam/i, name: "Sumadhura Nandanam" },
+    { re: /sumadhura\s*srinivasam|srinivasam/i, name: "Sumadhura Srinivasam" },
+    { re: /sumadhura/i,                     name: "Sumadhura Nandanam" }
+  ];
+  function findTower(text) {
+    for (var i = 0; i < TOWER_HINTS.length; i++) {
+      if (TOWER_HINTS[i].re.test(text)) return TOWER_HINTS[i].name;
+    }
+    return null;
+  }
+
+  function findMeal(text) {
+    for (var i = 0; i < MEALS.length; i++) {
+      if (MEALS[i].re.test(text)) return MEALS[i].slot;
+    }
+    return null;
+  }
+
+  /* ---------- items ----------
+     "1 chicken biryani, 1 radha ballavi" -> two items
+     "250 gm Ghujiya"                     -> one item, qty 1
+     Returns [] when nothing dish-like is found. */
+  var TOWER_NOISE = /\b(heh|gg|olive(\s*apartments?)?|gopalan(\s*grandeur)?|sumadhura(\s*nandanam|\s*srinivasam)?|nandanam|srinivasam|raja\s*ritz|five\s*summits?(\s*address)?|habitat\s*eden\s*heights?)\b/gi;
+
+  function findItems(text) {
+    if (QUESTION.test(text)) return [];
+
+    var body = text
+      .replace(/^\s*for\s+\d{3,4}\s*[-–]?\s*/i, " ")        // "For 1083 - "
+      .replace(/^\s*\d{3,4}\s*,\s*/, " ")                        // "2012, "
+      .replace(/\([^)]*\)/g, " ")                                // "(lunch)"
+      .replace(/\bfor\s+(lunch|dinner|breakfast|evening|snacks?)\b/gi, " ")
+      .replace(/\b(lunch|dinner|breakfast|evening)\b/gi, " ")
+      .replace(TOWER_NOISE, " ")
+      .replace(/[-–]\s*[A-Za-z]?\s?\d{2,4}\s*$/, " ")
+      .replace(/\b[A-Za-z]\s?-\s?\d{2,4}\b/g, " ")               // B-605
+      .replace(/\b\d{3,4}\s*$/, " ")
+      .replace(/\bwill\s+porter\b/gi, " ")
+      .replace(/\bkindly\b[\s\S]*$/i, " ")
+      .replace(/\bplz\b|\bplease\b|\bthanks?\b|\bthank you\b/gi, " ");
+
+    var items = [];
+    body.split(/\s*(?:,|\band\b|\+|&|;|\n)\s*/i).forEach(function (part) {
+      part = part.trim();
+      if (!part || !DISH_WORDS.test(part)) return;
+
+      var qty = 1;
+      /* a leading number is a quantity unless it's a weight ("250 gm") */
+      var isWeight = /^\d{1,4}\s*(gm|gms|g|kg|ml|l)\b/i.test(part);
+      if (!isWeight) {
+        var q = part.match(/^(\d+(?:\.\d+)?)\s*(?:x\s*)?/);
+        if (q) { qty = parseFloat(q[1]); part = part.slice(q[0].length); }
+      }
+      var qe = part.match(/\s*[x×]\s*(\d+)\s*$/i);
+      if (qe) { qty = parseFloat(qe[1]); part = part.slice(0, qe.index); }
+
+      var name = part
+        .replace(/^\s*(plates?|nos?|pcs?|packets?)\s+(of\s+)?/i, "")
+        .replace(/\s*(plates?|pcs?)\s*$/i, "")
+        .replace(/[☀-➿️❤\u{1F300}-\u{1FAFF}]/gu, " ")  // emoji
+        .replace(/[.,;:–-]+\s*$/, "")                        // trailing punctuation
+        .replace(/^\s*[.,;:–-]+/, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+
+      if (!name || name.length < 3) return;
+      if (qty <= 0 || qty > 99) qty = 1;
+      name = name.charAt(0).toUpperCase() + name.slice(1);
+      items.push({ name: name, qty: qty });
+    });
+    return items;
+  }
+
+  /* ---------- payment ---------- */
+  function findPayment(text) {
+    var m = text.match(/₹\s*([\d,]+(?:\.\d{1,2})?)/) ||
+            text.match(/\b(?:rs\.?|inr)\s*([\d,]+(?:\.\d{1,2})?)/i);
+    if (!m) return null;
+    var amt = parseFloat(m[1].replace(/,/g, ""));
+    if (!(amt > 0)) return null;
+    var paid = /paid|sent to|upi|phonepe|gpay|google pay|paytm|transferred/i.test(text);
+    return { amount: amt, confirmed: paid };
+  }
+
+  /* ---------- review ----------
+     Only unmistakable praise or complaint, so the preview stays honest. */
+  var PRAISE = /\b(delicious|yummy|tasty|amazing|excellent|lovely|superb|fantastic|wonderful|loved it|love it|so good|very good|too good|awesome|great food|perfect|best)\b|❤|😋|😍|👌|🤤|🔥/i;
+  var GRIPE  = /\b(cold|late|soggy|bland|salty|spicy|stale|missing|wrong order|disappointed|not good|bad)\b/i;
+
+  /* An order names a quantity up front ("2 vada pav", "250 gm ghujiya").
+     Praise about food already eaten does not. */
+  var ORDER_SHAPE = /(^|[,;]\s*|\band\s+)\d+(\.\d+)?\s*(x\s*)?(plates?|nos?|pcs?|gm|gms|g|kg)?\s*[a-z]/i;
+
+  function findReview(text) {
+    if (findPayment(text)) return null;
+    var praise = PRAISE.test(text), gripe = GRIPE.test(text);
+    if (!praise && !gripe) return null;
+    /* "2 biryani please" with a heart is still an order */
+    if (ORDER_SHAPE.test(text) && findItems(text).length) return null;
+    return { rating: praise ? 5 : 2, body: text.slice(0, 300) };
+  }
+
+  /* ---------- the whole export ---------- */
+  function parse(raw) {
+    var msgs = toMessages(raw);
+    var orders = [], payments = [], reviews = [], skipped = 0;
+
+    msgs.forEach(function (m) {
+      var fromAdmin = ADMINS.test(m.sender);
+
+      var pay = findPayment(m.text);
+      if (pay && !fromAdmin) {
+        payments.push({
+          at: m.date, who: m.sender,
+          amount: pay.amount, confirmed: pay.confirmed, text: m.text.slice(0, 200)
+        });
+        return;
+      }
+      if (fromAdmin) { skipped++; return; }
+
+      /* praise first — "the biryani was delicious" is not an order */
+      var rev = findReview(m.text);
+      if (rev) {
+        reviews.push({ at: m.date, who: m.sender, rating: rev.rating, body: rev.body });
+        return;
+      }
+
+      var items = findItems(m.text);
+      if (items.length) {
+        orders.push({
+          at: m.date, who: m.sender, items: items,
+          flat: findFlat(m.text), tower: findTower(m.text),
+          meal: findMeal(m.text), text: m.text.slice(0, 220)
+        });
+        return;
+      }
+      skipped++;
+    });
+
+    return { orders: orders, payments: payments, reviews: reviews,
+             total: msgs.length, skipped: skipped };
+  }
+
+  return { parse: parse, parseLine: parseLine, toMessages: toMessages,
+           findItems: findItems, findFlat: findFlat, findTower: findTower,
+           findMeal: findMeal, findPayment: findPayment };
+})();
+</script>
 
 <script>
 (function () {
@@ -912,7 +1267,16 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     },
     createReview: function (r) {
       if (this.mode === "supabase") {
-        return this.sb.from("reviews").insert(r).then(thrower);
+        var self = this;
+        return this.sb.from("reviews").insert(r).then(function (res) {
+          /* older databases have no chef_id column — post it as a plain review
+             rather than losing it */
+          if (res && res.error && /chef_id/.test(res.error.message || "")) {
+            var plain = Object.assign({}, r); delete plain.chef_id;
+            return self.sb.from("reviews").insert(plain).then(thrower);
+          }
+          return thrower(res);
+        });
       }
       if (this.mode === "claude") {
         return this._cPut("reviews", uid(),
@@ -1025,6 +1389,7 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     cart: lsGet("srn_cart", {}),
     loaded: false, pendingPhoto: null, newDiet: "veg",
     reviewDraft: { rating: 0 },
+    chefPage: null,
     cal: { y: new Date().getFullYear(), m: new Date().getMonth(), day: null,
            byDay: {}, ordersByDay: {}, loading: false }
   };
@@ -1133,13 +1498,24 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     $("#menuSub").textContent = shown.length + (shown.length === 1 ? " dish" : " dishes") +
       " from " + chefCount + (chefCount === 1 ? " chef" : " of our chefs") + ".";
 
+    function chefHeader(c, count, open) {
+      return '<div class="chefhead">' +
+        '<button class="cheflink" data-chefpage="' + c.id + '" aria-label="See everything ' + esc(c.name) + ' is cooking">' +
+          '<span class="av">' + esc(c.name.slice(0, 1)) + "</span>" +
+          "<h3>" + esc(c.name) + "</h3>" +
+          '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>' +
+        "</button>" +
+        '<span class="count tnum">' + count + "</span>" +
+        (open ? '<span class="badge open">Taking orders</span>'
+              : '<span class="badge closed">Closed for now</span>') +
+        "</div>";
+    }
+
     var html = "";
     state.chefs.forEach(function (c) {
       var mine = shown.filter(function (d) { return d.chef_id === c.id; });
       if (mine.length) {
-        html += '<section class="chefgroup"><div class="chefhead"><h3>' + esc(c.name) + "</h3>" +
-          '<span class="count tnum">' + mine.length + "</span>" +
-          '<span class="badge open">Taking orders</span></div>' +
+        html += '<section class="chefgroup">' + chefHeader(c, mine.length, true) +
           mine.map(function (d) { return dishCard(d, true); }).join("") + "</section>";
       }
     });
@@ -1147,12 +1523,84 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
       if (c.open) return;
       var mine = posted.filter(function (d) { return d.chef_id === c.id; });
       if (!mine.length) return;
-      html += '<section class="chefgroup"><div class="chefhead"><h3>' + esc(c.name) + "</h3>" +
-        '<span class="count tnum">' + mine.length + "</span>" +
-        '<span class="badge closed">Closed for now</span></div>' +
+      html += '<section class="chefgroup">' + chefHeader(c, mine.length, false) +
         mine.map(function (d) { return dishCard(d, false); }).join("") + "</section>";
     });
     list.innerHTML = html;
+  }
+
+  /* ============================================================
+     ONE CHEF'S PAGE  (customer side — not the kitchen login)
+     ============================================================ */
+  function renderChefPage() {
+    var c = chefById(state.chefPage);
+    var box = $("#chefPageBody");
+    if (!c) {
+      box.innerHTML = '<div class="note plain">We couldn\'t find that chef.</div>';
+      return;
+    }
+
+    var mine = state.dishes.filter(function (d) {
+      return d.chef_id === c.id && d.available;
+    });
+    var live = c.open ? mine : [];
+    var hers = state.reviews.filter(function (r) { return r.chef_id === c.id; });
+    var avg = hers.length
+      ? hers.reduce(function (s, r) { return s + (Number(r.rating) || 0); }, 0) / hers.length
+      : 0;
+
+    var line = [];
+    line.push(c.open ? '<span class="badge open">Taking orders</span>'
+                     : '<span class="badge closed">Closed for now</span>');
+    line.push("<span>" + mine.length + (mine.length === 1 ? " dish" : " dishes") + " today</span>");
+    if (hers.length) {
+      line.push(starRow(Math.round(avg)) + '<span class="tnum">' + avg.toFixed(1) +
+        " · " + hers.length + (hers.length === 1 ? " review" : " reviews") + "</span>");
+    }
+
+    var html = '<div class="chefhero"><span class="av">' + esc(c.name.slice(0, 1)) + "</span>" +
+      '<div class="who"><h2>' + esc(c.name) + "</h2>" +
+      '<div class="line">' + line.join("") + "</div></div></div>";
+
+    html += '<div class="chefacts">' +
+      '<a class="btn ghost sm" href="tel:+' + esc(c.phone) + '">Call</a>' +
+      '<a class="btn ghost sm" href="https://wa.me/' + esc(c.phone) + '" target="_blank" rel="noopener">WhatsApp</a>' +
+      "</div>";
+
+    if (!mine.length) {
+      html += '<div class="empty" style="padding:20px 8px 34px"><img class="seal-xl" style="width:120px;height:120px" data-seal alt="">' +
+        '<p class="tagline" style="font-size:18px">' + esc(c.name) + " hasn't posted anything today.</p>" +
+        '<p class="sub">Have a look at what the other chefs are cooking.</p></div>';
+    } else if (!c.open) {
+      html += '<div class="note warn" style="margin-bottom:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/></svg>' +
+        "<span>" + esc(c.name) + " has closed her counter for now. These are today's dishes, back when she reopens.</span></div>" +
+        mine.map(function (d) { return dishCard(d, false); }).join("");
+    } else {
+      html += live.map(function (d) { return dishCard(d, true); }).join("");
+    }
+
+    if (hers.length) {
+      html += '<div class="divider"></div><h3 style="font-size:17px;margin-bottom:10px">What people said</h3>' +
+        hers.slice(0, 8).map(function (r) {
+          return '<div class="review"><div class="review-head">' +
+            '<span class="who">' + esc(r.name || "A guest") + "</span>" +
+            starRow(Number(r.rating) || 0) +
+            '<span class="when">' + esc(when(r.created_at)) + "</span></div>" +
+            (r.body ? "<p>" + esc(r.body) + "</p>" : "") + "</div>";
+        }).join("");
+    }
+
+    box.innerHTML = html;
+    $$("#chefPageBody [data-seal]").forEach(function (el) { el.src = SEAL; });
+  }
+
+  function openChefPage(id) {
+    state.chefPage = id;
+    setView("chefpage");
+    /* reviews may not be loaded yet if the customer came straight here */
+    if (!state.reviews.length) {
+      DB.reviews().then(function (r) { state.reviews = r; renderChefPage(); }).catch(function () {});
+    }
   }
 
   /* ============================================================
@@ -1184,6 +1632,7 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     if (next === 0) delete state.cart[id]; else state.cart[id] = { qty: next };
     lsSet("srn_cart", state.cart);
     renderMenu(); renderCartBar();
+    if (state.view === "chefpage") renderChefPage();
     if (!$("#sheet").hidden && sheetMode === "cart") openCart();
   }
 
@@ -1334,9 +1783,15 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     }).join("");
   }
 
-  function openReviewForm() {
-    state.reviewDraft = { rating: 0 };
+  function openReviewForm(chefId) {
+    state.reviewDraft = { rating: 0, chefId: chefId || state.chefPage || "" };
     openSheet("Rate your food",
+      '<div class="field"><label for="rChef">Whose food? <span class="hint">(optional)</span></label>' +
+      '<select id="rChef"><option value="">The kitchen in general</option>' +
+      state.chefs.map(function (c) {
+        return '<option value="' + esc(c.id) + '"' +
+          (state.reviewDraft.chefId === c.id ? " selected" : "") + ">" + esc(c.name) + "</option>";
+      }).join("") + "</select></div>" +
       '<div class="field"><label>How was it?</label><div class="starpick" id="starPick">' +
       [1,2,3,4,5].map(function (i) {
         return '<button type="button" data-star="' + i + '" aria-label="' + i + ' star' + (i>1?"s":"") + '">' + starSvg(false) + "</button>";
@@ -1358,14 +1813,19 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
   function submitReview() {
     if (!state.reviewDraft.rating) { $("#rateErr").hidden = false; return; }
     var btn = $("#submitReview"); btn.disabled = true; btn.textContent = "Posting…";
+    var sel = $("#rChef");
     DB.createReview({
       name: ($("#rName").value || "").trim().slice(0, 40),
       rating: state.reviewDraft.rating,
-      body: ($("#rText").value || "").trim().slice(0, 400)
+      body: ($("#rText").value || "").trim().slice(0, 400),
+      chef_id: (sel && sel.value) || null
     }).then(function () {
       return DB.reviews();
     }).then(function (rows) {
-      state.reviews = rows; renderReviews(); closeSheet(); toast("Thank you — your review is up.");
+      state.reviews = rows;
+      renderReviews();
+      if (state.view === "chefpage") renderChefPage();
+      closeSheet(); toast("Thank you — your review is up.");
     }).catch(function () {
       btn.disabled = false; btn.textContent = "Post review";
       toast("Couldn't post that. Check your connection and try again.");
@@ -1656,6 +2116,193 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
   }
 
   /* ============================================================
+     WHATSAPP IMPORT
+     Parses an exported chat, shows everything it found, and writes
+     only what the chef ticks.
+     ============================================================ */
+  var imported = { orders: [], reviews: [], payments: [] };
+
+  function handleExport(file) {
+    var label = $("#waFileLabel");
+    label.textContent = "Reading " + file.name + "…";
+    var fr = new FileReader();
+    fr.onload = function () {
+      var text = String(fr.result || "");
+      if (/^PK/.test(text.slice(0, 2))) {
+        label.textContent = "That's a .zip — open it and pick the .txt inside.";
+        $("#importResult").innerHTML =
+          '<div class="note warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/></svg>' +
+          "<span>WhatsApp zipped the export. Unzip it on your phone or computer and choose the <b>.txt</b> file inside.</span></div>";
+        return;
+      }
+      var res = WA.parse(text);
+      imported = res;
+      label.textContent = file.name + " — read " + res.total + " messages";
+      renderImportPreview(res);
+    };
+    fr.onerror = function () { label.textContent = "Couldn't read that file. Try again."; };
+    fr.readAsText(file);
+  }
+
+  function renderImportPreview(res) {
+    var box = $("#importResult");
+    if (!res.total) {
+      box.innerHTML = '<div class="note warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/></svg>' +
+        "<span>No messages in that file. Make sure you picked the exported chat and not something else.</span></div>";
+      return;
+    }
+
+    var mine = me();
+    var chefOptions = state.chefs.map(function (c) {
+      return '<option value="' + esc(c.id) + '"' + (mine && c.id === mine.id ? " selected" : "") + ">" + esc(c.name) + "</option>";
+    }).join("");
+
+    var html = '<div class="tallies">' +
+      '<div class="tally"><b class="tnum">' + res.orders.length + "</b><span>Orders</span></div>" +
+      '<div class="tally"><b class="tnum">' + res.reviews.length + "</b><span>Reviews</span></div>" +
+      '<div class="tally"><b class="tnum">' + res.payments.length + "</b><span>Payments</span></div>" +
+      "</div>";
+
+    html += '<div class="note plain" style="margin-bottom:16px">Read ' + res.total +
+      " messages. " + res.skipped + " were menus, chat or announcements and were left out. " +
+      "Untick anything that shouldn't come in.</div>";
+
+    /* ---- orders ---- */
+    if (res.orders.length) {
+      html += '<div class="impsec"><h4>Orders</h4>' +
+        '<p class="muted" style="font-size:12.5px;margin-bottom:6px">The chat never says who cooked what or what was charged, so set the chef and the amount here. Rows left at ₹0 still import — they just won\'t add to earnings.</p>' +
+        '<div class="selectbar"><button data-impall="orders">Select all</button><span class="muted">·</span><button data-impnone="orders">Select none</button></div>';
+      res.orders.forEach(function (o, i) {
+        var where = [o.tower, o.flat].filter(Boolean).join(" · ") || "no flat given";
+        html += '<div class="improw"><label class="pick"><input type="checkbox" data-imp="orders" data-i="' + i + '" checked></label>' +
+          '<div class="d"><div class="top"><strong>' + esc(o.who) + "</strong>" +
+          '<span class="meta">' + o.at.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) +
+          " · " + esc(where) + (o.meal ? " · " + esc(o.meal) : "") + "</span></div><ul>" +
+          o.items.map(function (it) { return "<li>" + esc(it.name) + " ×" + it.qty + "</li>"; }).join("") +
+          '</ul><div class="raw">“' + esc(o.text) + '”</div>' +
+          '<div class="fields"><select data-ochef="' + i + '">' + chefOptions + "</select>" +
+          '<input type="number" min="0" step="1" inputmode="numeric" placeholder="Amount ₹" data-oamt="' + i + '"></div>' +
+          "</div></div>";
+      });
+      html += "</div>";
+    }
+
+    /* ---- reviews ---- */
+    if (res.reviews.length) {
+      html += '<div class="impsec"><h4>Reviews</h4>' +
+        '<p class="muted" style="font-size:12.5px;margin-bottom:6px">Picked up from messages that praised or complained about the food. Ratings are a guess from the wording — change them if they\'re off.</p>' +
+        '<div class="selectbar"><button data-impall="reviews">Select all</button><span class="muted">·</span><button data-impnone="reviews">Select none</button></div>';
+      res.reviews.forEach(function (r, i) {
+        html += '<div class="improw"><label class="pick"><input type="checkbox" data-imp="reviews" data-i="' + i + '" checked></label>' +
+          '<div class="d"><div class="top"><strong>' + esc(r.who) + "</strong>" +
+          '<span class="meta">' + r.at.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) + "</span></div>" +
+          '<p style="font-size:13.5px;color:var(--ink-soft)">' + esc(r.body) + "</p>" +
+          '<div class="fields"><select data-rstars="' + i + '">' +
+          [5,4,3,2,1].map(function (n) {
+            return '<option value="' + n + '"' + (n === r.rating ? " selected" : "") + ">" + n + " star" + (n > 1 ? "s" : "") + "</option>";
+          }).join("") + "</select>" +
+          '<select data-rchef="' + i + '"><option value="">The kitchen</option>' + chefOptions.replace(" selected", "") + "</select></div>" +
+          "</div></div>";
+      });
+      html += "</div>";
+    }
+
+    /* ---- payments ---- */
+    if (res.payments.length) {
+      html += '<div class="impsec"><h4>Payments</h4>' +
+        '<p class="muted" style="font-size:12.5px;margin-bottom:6px">These come in as earnings for the chef you pick, on the day they were sent.</p>' +
+        '<div class="selectbar"><button data-impall="payments">Select all</button><span class="muted">·</span><button data-impnone="payments">Select none</button></div>';
+      res.payments.forEach(function (p, i) {
+        html += '<div class="improw"><label class="pick"><input type="checkbox" data-imp="payments" data-i="' + i + '" checked></label>' +
+          '<div class="d"><div class="top"><strong>' + esc(p.who) + "</strong>" +
+          '<span class="meta">' + p.at.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) + "</span>" +
+          '<span class="price tnum" style="margin-left:auto;font-size:15px">' + money(p.amount) + "</span></div>" +
+          '<div class="raw">“' + esc(p.text) + '”</div>' +
+          '<div class="fields"><select data-pchef="' + i + '">' + chefOptions + "</select></div>" +
+          "</div></div>";
+      });
+      html += "</div>";
+    }
+
+    if (!res.orders.length && !res.reviews.length && !res.payments.length) {
+      html += '<div class="note plain">Nothing recognisable in that export — no orders, reviews or payments found.</div>';
+    } else {
+      html += '<button class="btn full" id="doImport">Import what\'s ticked</button>' +
+        '<p class="muted center" style="font-size:12px;margin-top:9px">Importing the same file twice will create the rows twice.</p>';
+    }
+    box.innerHTML = html;
+  }
+
+  function runImport() {
+    var btn = $("#doImport");
+    btn.disabled = true; btn.textContent = "Importing…";
+
+    var jobs = [], counts = { orders: 0, reviews: 0, payments: 0 };
+
+    $$('[data-imp="orders"]:checked').forEach(function (cb) {
+      var i = +cb.dataset.i, o = imported.orders[i];
+      var chef = ($('[data-ochef="' + i + '"]') || {}).value || (me() || {}).id;
+      var amt = Number(($('[data-oamt="' + i + '"]') || {}).value || 0) || 0;
+      var per = o.items.length ? amt / o.items.length : 0;
+      jobs.push(DB.createOrder({
+        customer_name: o.who,
+        phone: "",
+        tower: o.tower || "From WhatsApp",
+        flat: o.flat || "—",
+        note: "Imported from WhatsApp" + (o.meal ? " · " + o.meal : ""),
+        items: o.items.map(function (it) {
+          return { chef_id: chef, name: it.name, qty: it.qty,
+                   price: it.qty ? per / it.qty : 0, amount: per };
+        }),
+        grand: amt,
+        placed_at: o.at.toISOString()
+      }).then(function () { counts.orders++; }));
+    });
+
+    $$('[data-imp="reviews"]:checked').forEach(function (cb) {
+      var i = +cb.dataset.i, r = imported.reviews[i];
+      jobs.push(DB.createReview({
+        name: r.who,
+        rating: Number(($('[data-rstars="' + i + '"]') || {}).value || r.rating),
+        body: r.body,
+        chef_id: ($('[data-rchef="' + i + '"]') || {}).value || null,
+        created_at: r.at.toISOString()
+      }).then(function () { counts.reviews++; }));
+    });
+
+    $$('[data-imp="payments"]:checked').forEach(function (cb) {
+      var i = +cb.dataset.i, p = imported.payments[i];
+      var chef = ($('[data-pchef="' + i + '"]') || {}).value || (me() || {}).id;
+      jobs.push(DB.addManual({
+        chef_id: chef, day: dayKey(p.at), amount: Math.round(p.amount),
+        note: "WhatsApp · " + p.who
+      }).then(function () { counts.payments++; }));
+    });
+
+    if (!jobs.length) {
+      btn.disabled = false; btn.textContent = "Import what's ticked";
+      toast("Nothing ticked to import.");
+      return;
+    }
+
+    Promise.all(jobs.map(function (j) { return j.catch(function (e) { return e; }); }))
+      .then(function () {
+        $("#importResult").innerHTML =
+          '<div class="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>' +
+          "<span>Brought in " + counts.orders + " orders, " + counts.reviews +
+          " reviews and " + counts.payments + " payments. They're in Orders and on the Earnings calendar now.</span></div>";
+        $("#waFileLabel").textContent = "Choose the exported chat file";
+        $("#waFile").value = "";
+        imported = { orders: [], reviews: [], payments: [] };
+        return DB.recentOrders().then(function (r) { state.orders = r; });
+      })
+      .then(function () { return DB.reviews(); })
+      .then(function (r) { state.reviews = r; })
+      .catch(function () {})
+      .then(function () { toast("Import finished."); });
+  }
+
+  /* ============================================================
      views
      ============================================================ */
   function setSub(which) {
@@ -1667,6 +2314,7 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
     $("#sub-add").hidden = which !== "add";
     $("#sub-orders").hidden = which !== "orders";
     $("#sub-earn").hidden = which !== "earn";
+    $("#sub-import").hidden = which !== "import";
     if (which === "orders") {
       DB.recentOrders().then(function (r) { state.orders = r; renderOrders(); })
         .catch(function () { renderOrders(); });
@@ -1676,10 +2324,15 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
 
   function setView(v) {
     state.view = v;
-    ["menu", "reviews", "contact", "chef"].forEach(function (k) { $("#v-" + k).hidden = k !== v; });
-    $$(".tabbar button").forEach(function (b) {
-      b.setAttribute("aria-selected", String(b.dataset.view === v));
+    ["menu", "chefpage", "reviews", "contact", "chef"].forEach(function (k) {
+      $("#v-" + k).hidden = k !== v;
     });
+    /* a chef's page lives under Menu, so that tab stays lit */
+    var tab = (v === "chefpage") ? "menu" : v;
+    $$(".tabbar button").forEach(function (b) {
+      b.setAttribute("aria-selected", String(b.dataset.view === tab));
+    });
+    if (v === "chefpage") renderChefPage();
     if (v === "reviews") {
       DB.reviews().then(function (r) { state.reviews = r; renderReviews(); }).catch(renderReviews);
     }
@@ -1697,6 +2350,7 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
       });
       lsSet("srn_cart", state.cart);
       renderMenu(); renderCartBar();
+      if (state.view === "chefpage") renderChefPage();
       if (state.view === "chef") renderAdmin();
     });
   }
@@ -1706,13 +2360,24 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
      ============================================================ */
   document.addEventListener("click", function (e) {
     var t = e.target.closest("[data-inc],[data-dec],[data-slot],[data-diet],[data-view],[data-sub]," +
-      "[data-chef],[data-star],[data-emoji],[data-copy],[data-del],[data-toggle],[data-editprice]," +
-      "[data-day],[data-saveprice],#viewCart,#sheetClose,#sheetScrim,#toDetails,#openReview," +
-      "#submitReview,#doneOrder,#loginBtn,#logoutBtn,#themeBtn,#calPrev,#calNext,#addManual");
+      "[data-chef],[data-chefpage],[data-star],[data-emoji],[data-copy],[data-del],[data-toggle]," +
+      "[data-editprice],[data-day],[data-saveprice],#viewCart,#sheetClose,#sheetScrim,#toDetails," +
+      "#openReview,#submitReview,#doneOrder,#loginBtn,#logoutBtn,#themeBtn,#calPrev,#calNext," +
+      "#addManual,#backToMenu,#doImport,[data-impall],[data-impnone]");
     if (!t) return;
+
+    if (t.id === "doImport") return runImport();
+    if (t.dataset.impall || t.dataset.impnone) {
+      var kind = t.dataset.impall || t.dataset.impnone;
+      var on = !!t.dataset.impall;
+      $$('[data-imp="' + kind + '"]').forEach(function (cb) { cb.checked = on; });
+      return;
+    }
 
     if (t.dataset.inc) return bump(t.dataset.inc, 1);
     if (t.dataset.dec) return bump(t.dataset.dec, -1);
+    if (t.dataset.chefpage) return openChefPage(t.dataset.chefpage);
+    if (t.id === "backToMenu") return setView("menu");
     if (t.dataset.slot) { state.slot = t.dataset.slot; renderFilters(); return renderMenu(); }
     if (t.dataset.diet && t.closest("#dietChips")) { state.diet = t.dataset.diet; renderFilters(); return renderMenu(); }
     if (t.dataset.diet && t.closest("#dDiet")) {
@@ -1871,6 +2536,11 @@ input:focus,textarea:focus,select:focus{ outline:2px solid var(--accent); outlin
       DB.saveChef(c.id, { open: open }).then(function () {
         c.open = open; renderMenu();
       }).catch(function () { toast("Couldn't change that."); });
+      return;
+    }
+    if (e.target.id === "waFile") {
+      var wf = e.target.files && e.target.files[0];
+      if (wf) handleExport(wf);
       return;
     }
     if (e.target.id === "dImage") {
