@@ -1,0 +1,19 @@
+{
+  "name": "srn-kitchen-listener",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reads SRN Kitchen's WhatsApp groups and files orders, reviews and payments into the web app. Never sends anything.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dry": "DRY_RUN=1 node index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "baileys": "6.7.24",
+    "pino": "9.5.0",
+    "qrcode-terminal": "0.12.0"
+  }
+}

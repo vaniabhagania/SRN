@@ -1,0 +1,8 @@
+node_modules/
+
+# The linked-device session. Treat it like a password: anyone holding it is
+# signed in as that WhatsApp account.
+auth/
+
+# Message ids already filed, so a restart doesn't re-import.
+seen.json
