@@ -111,6 +111,50 @@ create table if not exists pending_dishes (
 );
 create index if not exists pending_dishes_open_idx on pending_dishes(resolved, posted_at desc);
 
+-- ------------------------------------- counter opened/closed from the chat ----
+-- When a chef posts "orders closed" in the group, the sync closes her counter,
+-- which takes her dishes off the customer menu; a fresh menu or "orders open"
+-- reopens it. That changes what every customer sees, so unlike the queues above
+-- it is not open to anyone: the sync calls sync_counter() with a secret, and
+-- only a hash of that secret lives here. Nobody can read the table through the
+-- API. To set or change the secret (use your own long random value):
+--
+--   insert into sync_secret (id, hash)
+--   values (1, encode(sha256(convert_to('<your secret>', 'utf8')), 'hex'))
+--   on conflict (id) do update set hash = excluded.hash;
+--
+-- Give the same secret to the listener as SRN_SYNC_SECRET and to the hourly sync.
+create table if not exists sync_secret (
+  id   int primary key default 1 check (id = 1),
+  hash text not null
+);
+alter table sync_secret enable row level security;     -- no policies: unreadable
+revoke all on sync_secret from anon, authenticated;
+
+create or replace function sync_counter(
+  p_token text, p_chef text, p_open boolean, p_at timestamptz
+) returns text language plpgsql security definer set search_path = public as $$
+declare cur record;
+begin
+  if not exists (
+    select 1 from sync_secret s
+    where s.hash = encode(sha256(convert_to(coalesce(p_token, ''), 'utf8')), 'hex')
+  ) then
+    raise exception 'not allowed' using errcode = '42501';
+  end if;
+
+  select open, updated_at into cur from chefs where id = p_chef;
+  if not found then return 'no such chef'; end if;
+  /* her own switch in the app wins over an older message */
+  if p_at <= cur.updated_at then return 'ignored: changed more recently'; end if;
+  if cur.open = p_open then return 'unchanged'; end if;
+
+  update chefs set open = p_open, updated_at = now() where id = p_chef;
+  return case when p_open then 'opened' else 'closed' end;
+end $$;
+revoke all on function sync_counter(text, text, boolean, timestamptz) from public;
+grant execute on function sync_counter(text, text, boolean, timestamptz) to anon, authenticated;
+
 -- ----------------------------------------------- manually added earnings ----
 -- For days that were sold before the app existed, or cash taken outside it.
 create table if not exists manual_earnings (

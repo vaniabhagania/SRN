@@ -230,6 +230,32 @@ async function savePendingDish(d, chefId, msgKey) {
   if (!r.ok) throw new Error(`POST pending_dishes → ${r.status} ${await r.text()}`);
 }
 
+/* Open or close a chef's counter because she said so in the chat.
+   Closing hides her dishes from the customer menu; the app already treats
+   `chefs.open = false` that way.
+
+   Unlike the queues above this is not a plain insert: it changes what every
+   customer sees, so it goes through a database function that checks a secret.
+   Set SRN_SYNC_SECRET to the same value the database holds the hash of.
+   Without it the listener only logs what it would have done.
+
+   The function itself ignores the call if the chef changed her counter more
+   recently than the message — her own switch in the app wins. */
+async function setCounter(chefId, open, at) {
+  if (!cfg.SYNC_SECRET) return "skipped (no SRN_SYNC_SECRET set)";
+  if (cfg.DRY_RUN) {
+    console.log(`  [dry run] would ${open ? "open" : "close"} ${chefId}'s counter`);
+    return "dry run";
+  }
+  const r = await fetch(REST + "rpc/sync_counter", {
+    method: "POST",
+    headers: { apikey: cfg.SUPABASE_KEY, Authorization: "Bearer " + cfg.SUPABASE_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_token: cfg.SYNC_SECRET, p_chef: chefId, p_open: open, p_at: at.toISOString() })
+  });
+  if (!r.ok) throw new Error(`rpc sync_counter → ${r.status} ${await r.text()}`);
+  return String(await r.json());
+}
+
 async function savePayment(p, chefId) {
   await post("pending_payments", {
     who: p.who,
@@ -241,4 +267,4 @@ async function savePayment(p, chefId) {
   });
 }
 
-module.exports = { saveOrder, saveReview, savePayment, savePendingDish, refreshMenu, priceItem, gramsIn, near, squash };
+module.exports = { saveOrder, saveReview, savePayment, savePendingDish, setCounter, refreshMenu, priceItem, gramsIn, near, squash };

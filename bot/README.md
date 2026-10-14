@@ -198,6 +198,8 @@ sudo systemctl restart srn-listener
 |---|---|
 | "1 chicken biryani for lunch - 2104" | Order, priced from the menu, on the matching chef's calendar |
 | "Atta Laddoo 250g for 250rs" from a chef | Queued under *Dishes* in her Chef tab as a card — one tap to add it to the menu |
+| "Orders closed" / "sold out" from a chef | Her counter closes — her dishes come off the customer menu until she reopens |
+| A new menu post, or "orders open" / "kindly place your orders" from a chef | Her counter reopens |
 | Anything else from a chef | Ignored — chefs post menus and announcements, not orders |
 | "Is biryani available?" | Ignored — a question is not an order |
 | "the biryani was delicious ❤" | Review, 5 stars |
@@ -210,6 +212,13 @@ Anything it cannot match comes through at ₹0 for you to price in the app.
 
 Weights are understood: "500 gram" of a dish the menu sells as "(250 g)" is filed
 as two of them.
+
+**Opening and closing the counter** changes what every customer sees, so it isn't
+open to anyone. It goes through a database function that checks a secret: set
+`SRN_SYNC_SECRET` (an environment variable, never a file in git) to the value the
+database holds the hash of — see the `sync_secret` note in `schema.sql`. Without
+it the listener still files orders and only logs what it would have done. A chef's
+own switch in the app always beats an older message in the chat.
 
 A menu post never goes straight onto the public menu. The listener has no login
 and the security rules only let the chef write her own dishes, so it queues the
@@ -231,6 +240,7 @@ All in `config.js`, all overridable by environment variable.
 | `DEFAULT_CHEF` | Who gets an order when nothing identifies the chef |
 | `CHEF_CHAT_NAMES` | How each chef appears in chat, so their posts are read as menus. "Mom" is Neha |
 | `MAX_AGE_HOURS` | Ignore anything older than this on reconnect, so a few days offline doesn't import a backlog |
+| `SRN_SYNC_SECRET` | Lets the listener open and close a chef's counter. Environment only |
 | `DRY_RUN` | `1` to read and log without writing |
 | `AUTH_DIR` | Where the WhatsApp session lives. Keep it — it is what avoids re-scanning the QR |
 

@@ -35,6 +35,12 @@ module.exports = {
   SUPABASE_URL: process.env.SUPABASE_URL || "https://xaawulloreqdfpbzcket.supabase.co",
   SUPABASE_KEY: process.env.SUPABASE_KEY || "sb_publishable_q5-8XsV_3jJ7RK2hTlYPLA_lUb74S1T",
 
+  /* Lets the listener open and close a chef's counter when she posts
+     "orders closed". It is a password: keep it in the environment, never in
+     this file or in git. Without it the listener still files orders, but only
+     logs what it would have done about the counter. */
+  SYNC_SECRET: process.env.SRN_SYNC_SECRET || "",
+
   /* Where the WhatsApp session is kept, so it doesn't ask for the QR code
      every restart. Back this folder up and it survives a redeploy. */
   AUTH_DIR: process.env.AUTH_DIR || "./auth",

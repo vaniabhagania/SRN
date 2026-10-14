@@ -149,3 +149,16 @@ puts it live. It is a queue rather than a direct write because only a signed-in
 chef can write to `dishes` — that is what stops strangers posting to the menu.
 Run `schema.sql` again to create the table on an existing project; it is safe
 to re-run.
+
+## Orders closed
+
+When a chef posts that orders are closed ("Orders closed for today", "sold out"),
+the sync and the listener close her counter, and her dishes come off the
+customer menu — customers see a line saying she has closed. A new menu post, or
+"orders open", brings them back, and so does her own Open/Closed switch in the
+Chef tab (her switch always beats an older message in the chat).
+
+It goes through the `sync_counter()` database function rather than a plain
+write, because it changes what every customer sees: the function checks a secret
+and only a hash of it is stored (`sync_secret`, unreadable through the API).
+Re-run `schema.sql`, then set the secret as described in the comments there.

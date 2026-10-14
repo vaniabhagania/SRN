@@ -1110,6 +1110,37 @@ var WA = (function () {
     return out;
   }
 
+  /* ---------- counter open / closed ----------
+     A chef saying the kitchen has stopped (or started) taking orders:
+       "Orders closed for today"   "Lunch orders are closed"   "sold out"
+       "Kindly pre book your orders for tomorrow"   "Orders open"
+     Returns "closed", "open" or null. null means "no change" — when in doubt
+     the counter is left alone, since a wrong guess hides or shows a menu.
+     Closed wins when a message says both ("orders closed, will reopen
+     tomorrow"). Only chefs' own posts are read this way. */
+  var CLOSED_RES = [
+    /\b(orders?|bookings?|pre-?bookings?|pre-?orders?|counter|kitchen|taking orders)\b[^.\n!]{0,40}\b(closed?|closing|over|full|stopped|finished|ended|sold\s*out|not\s+(?:being\s+)?(?:taken|accepted)|no\s+more)\b/i,
+    /\b(?:orders?|bookings?)\s+(?:are\s+|is\s+|now\s+|have\s+)*(?:closed?|over|full|stopped|finished)\b/i,
+    /\b(?:no\s+more|not\s+taking(?:\s+any)?(?:\s+more)?|stopped\s+taking(?:\s+any)?(?:\s+more)?|stop\s+taking)\s+(?:orders?|bookings?)\b/i,
+    /\b(?:we(?:'re|\s+are)\s+closed|closed\s+for\s+(?:today|the\s+day|now|lunch|dinner)|sold\s*out|all\s+(?:sold|booked)(?:\s+out)?)\b/i
+  ];
+  var OPEN_RES = [
+    /\b(?:orders?|bookings?|counter|kitchen)\b[^.\n!]{0,30}\b(?:open(?:ed)?|re-?opened|resumed|started)\b/i,
+    /\b(?:now\s+open|open\s+for\s+orders?|open\s+again|re-?open(?:ed)?|taking\s+orders|accepting\s+orders)\b/i,
+    /\b(?:kindly\s+|please\s+|pls\s+)?(?:place|book|pre-?book|pre-?order|send)\b[^.\n!]{0,30}\borders?\b/i
+  ];
+  /* "orders will open tomorrow" is not open now */
+  var NOT_YET = /\b(will|shall|tomorrow|tmrw|from\s+\d|after\s+\d|soon|later)\b[^.\n!]{0,20}\b(open|reopen|start|resume)/i;
+
+  function findCounter(text) {
+    var t = String(text || "");
+    if (!t.trim() || QUESTION.test(t)) return null;
+    for (var i = 0; i < CLOSED_RES.length; i++) if (CLOSED_RES[i].test(t)) return "closed";
+    if (NOT_YET.test(t)) return null;
+    for (var j = 0; j < OPEN_RES.length; j++) if (OPEN_RES[j].test(t)) return "open";
+    return null;
+  }
+
   /* ---------- review ----------
      Only unmistakable praise or complaint, so the preview stays honest. */
   var PRAISE = /\b(delicious|yummy|tasty|amazing|excellent|lovely|superb|fantastic|wonderful|loved it|love it|so good|very good|too good|awesome|great food|perfect|best)\b|❤|😋|😍|👌|🤤|🔥/i;
@@ -1131,15 +1162,19 @@ var WA = (function () {
   /* ---------- the whole export ---------- */
   function parse(raw) {
     var msgs = toMessages(raw);
-    var orders = [], payments = [], reviews = [], menu = [], skipped = 0;
+    var orders = [], payments = [], reviews = [], menu = [], counter = [], skipped = 0;
 
     msgs.forEach(function (m) {
       var who = cleanName(m.sender);
       var fromAdmin = ADMINS.test(who);
 
-      /* a chef posting dishes with prices is the menu, not an order */
+      /* a chef's own post can also open or close her counter */
       if (fromAdmin && chefFor(who)) {
         var dishes = findMenu(m.text);
+        var state = findCounter(m.text);
+        /* a fresh menu is an invitation to order, unless the same post says otherwise */
+        if (!state && dishes.length) state = "open";
+        if (state) counter.push({ at: m.date, chef: chefFor(who), state: state, text: m.text.slice(0, 200) });
         if (dishes.length) {
           dishes.forEach(function (d) {
             menu.push({ at: m.date, chef: chefFor(who), name: d.name, price: d.price,
@@ -1182,13 +1217,13 @@ var WA = (function () {
       skipped++;
     });
 
-    return { orders: orders, payments: payments, reviews: reviews, menu: menu,
+    return { orders: orders, payments: payments, reviews: reviews, menu: menu, counter: counter,
              total: msgs.length, skipped: skipped };
   }
 
   return { parse: parse, parseLine: parseLine, toMessages: toMessages,
            findItems: findItems, findFlat: findFlat, findTower: findTower,
-           findMeal: findMeal, findPayment: findPayment, findMenu: findMenu,
+           findMeal: findMeal, findPayment: findPayment, findMenu: findMenu, findCounter: findCounter,
            cleanName: cleanName, chefFor: chefFor };
 })();
 </script>
@@ -1745,8 +1780,13 @@ var WA = (function () {
     var list = $("#menuList"), empty = $("#menuEmpty");
     var posted = state.dishes.filter(function (d) { return d.available; });
     var shown = visibleDishes();
+    /* every dish that's up belongs to a chef who has closed her counter */
+    var allClosed = posted.length > 0 && posted.every(function (d) {
+      var c = chefById(d.chef_id);
+      return c && !c.open;
+    });
 
-    $("#filterBox").hidden = !posted.length;
+    $("#filterBox").hidden = !posted.length || allClosed;
     $("#menuDate").textContent = new Date().toLocaleDateString("en-IN",
       { weekday: "long", day: "numeric", month: "long" });
 
@@ -1754,6 +1794,12 @@ var WA = (function () {
       list.innerHTML = ""; empty.hidden = false;
       $("#emptySub").textContent = "Our chefs haven't posted today's meals yet. Check back a little later.";
       $("#menuSub").textContent = "Nothing on the stove just yet.";
+      return;
+    }
+    if (allClosed) {
+      list.innerHTML = ""; empty.hidden = false;
+      $("#emptySub").textContent = "Orders are closed for now. Our chefs will be back with a fresh menu soon, so check back a little later.";
+      $("#menuSub").textContent = "Orders are closed right now.";
       return;
     }
     if (!shown.length) {
@@ -1790,12 +1836,14 @@ var WA = (function () {
           mine.map(function (d) { return dishCard(d, true); }).join("") + "</section>";
       }
     });
+    /* A chef who has closed her counter has no dishes on the menu: only a
+       line, so customers know why she is missing. They come back when she
+       reopens — by her switch in the Chef tab, or by saying so in the group. */
     state.chefs.forEach(function (c) {
       if (c.open) return;
-      var mine = posted.filter(function (d) { return d.chef_id === c.id; });
-      if (!mine.length) return;
-      html += '<section class="chefgroup">' + chefHeader(c, mine.length, false) +
-        mine.map(function (d) { return dishCard(d, false); }).join("") + "</section>";
+      if (!posted.some(function (d) { return d.chef_id === c.id; })) return;
+      html += '<div class="note plain closedchef">' + esc(c.name) +
+        " has closed orders for now. Her dishes are back on the menu when she reopens.</div>";
     });
     list.innerHTML = html;
   }
@@ -1823,7 +1871,7 @@ var WA = (function () {
     var line = [];
     line.push(c.open ? '<span class="badge open">Taking orders</span>'
                      : '<span class="badge closed">Closed for now</span>');
-    line.push("<span>" + mine.length + (mine.length === 1 ? " dish" : " dishes") + " today</span>");
+    if (c.open) line.push("<span>" + mine.length + (mine.length === 1 ? " dish" : " dishes") + " today</span>");
     if (hers.length) {
       line.push(starRow(Math.round(avg)) + '<span class="tnum">' + avg.toFixed(1) +
         " · " + hers.length + (hers.length === 1 ? " review" : " reviews") + "</span>");
@@ -1844,8 +1892,7 @@ var WA = (function () {
         '<p class="sub">Have a look at what the other chefs are cooking.</p></div>';
     } else if (!c.open) {
       html += '<div class="note warn" style="margin-bottom:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.4"/></svg>' +
-        "<span>" + esc(c.name) + " has closed her counter for now. These are today's dishes, back when she reopens.</span></div>" +
-        mine.map(function (d) { return dishCard(d, false); }).join("");
+        "<span>" + esc(c.name) + " has closed her counter for now. Her dishes are back here when she reopens.</span></div>";
     } else {
       html += live.map(function (d) { return dishCard(d, true); }).join("");
     }
@@ -3013,7 +3060,7 @@ var WA = (function () {
       var c = me(); if (!c) return;
       var open = e.target.checked;
       $("#openLabel").textContent = open ? "Open" : "Closed";
-      DB.saveChef(c.id, { open: open }).then(function () {
+      DB.saveChef(c.id, { open: open, updated_at: new Date().toISOString() }).then(function () {
         c.open = open; renderMenu();
       }).catch(function () { toast("Couldn't change that."); });
       return;

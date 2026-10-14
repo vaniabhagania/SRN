@@ -144,6 +144,13 @@ async function handle(m, sock) {
        menu with one tap — this listener has no login, so it cannot add
        dishes itself. */
     if (chefSender) {
+      /* "Orders closed" takes her dishes off the customer menu; a fresh menu
+         or "orders open" puts them back. The last thing she said wins. */
+      const last = res.counter[res.counter.length - 1];
+      if (last) {
+        const result = await store.setCounter(chefSender, last.state === "open", at);
+        log(`counter  ${group.name}  ${chefSender}  ${last.state}  → ${result}`);
+      }
       for (const d of res.menu) {
         const key = `${id}:${d.name}`.slice(0, 120);
         await store.savePendingDish({ ...d, at }, chefSender, key);

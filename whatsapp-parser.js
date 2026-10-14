@@ -335,6 +335,37 @@ var WA = (function () {
     return out;
   }
 
+  /* ---------- counter open / closed ----------
+     A chef saying the kitchen has stopped (or started) taking orders:
+       "Orders closed for today"   "Lunch orders are closed"   "sold out"
+       "Kindly pre book your orders for tomorrow"   "Orders open"
+     Returns "closed", "open" or null. null means "no change" — when in doubt
+     the counter is left alone, since a wrong guess hides or shows a menu.
+     Closed wins when a message says both ("orders closed, will reopen
+     tomorrow"). Only chefs' own posts are read this way. */
+  var CLOSED_RES = [
+    /\b(orders?|bookings?|pre-?bookings?|pre-?orders?|counter|kitchen|taking orders)\b[^.\n!]{0,40}\b(closed?|closing|over|full|stopped|finished|ended|sold\s*out|not\s+(?:being\s+)?(?:taken|accepted)|no\s+more)\b/i,
+    /\b(?:orders?|bookings?)\s+(?:are\s+|is\s+|now\s+|have\s+)*(?:closed?|over|full|stopped|finished)\b/i,
+    /\b(?:no\s+more|not\s+taking(?:\s+any)?(?:\s+more)?|stopped\s+taking(?:\s+any)?(?:\s+more)?|stop\s+taking)\s+(?:orders?|bookings?)\b/i,
+    /\b(?:we(?:'re|\s+are)\s+closed|closed\s+for\s+(?:today|the\s+day|now|lunch|dinner)|sold\s*out|all\s+(?:sold|booked)(?:\s+out)?)\b/i
+  ];
+  var OPEN_RES = [
+    /\b(?:orders?|bookings?|counter|kitchen)\b[^.\n!]{0,30}\b(?:open(?:ed)?|re-?opened|resumed|started)\b/i,
+    /\b(?:now\s+open|open\s+for\s+orders?|open\s+again|re-?open(?:ed)?|taking\s+orders|accepting\s+orders)\b/i,
+    /\b(?:kindly\s+|please\s+|pls\s+)?(?:place|book|pre-?book|pre-?order|send)\b[^.\n!]{0,30}\borders?\b/i
+  ];
+  /* "orders will open tomorrow" is not open now */
+  var NOT_YET = /\b(will|shall|tomorrow|tmrw|from\s+\d|after\s+\d|soon|later)\b[^.\n!]{0,20}\b(open|reopen|start|resume)/i;
+
+  function findCounter(text) {
+    var t = String(text || "");
+    if (!t.trim() || QUESTION.test(t)) return null;
+    for (var i = 0; i < CLOSED_RES.length; i++) if (CLOSED_RES[i].test(t)) return "closed";
+    if (NOT_YET.test(t)) return null;
+    for (var j = 0; j < OPEN_RES.length; j++) if (OPEN_RES[j].test(t)) return "open";
+    return null;
+  }
+
   /* ---------- review ----------
      Only unmistakable praise or complaint, so the preview stays honest. */
   var PRAISE = /\b(delicious|yummy|tasty|amazing|excellent|lovely|superb|fantastic|wonderful|loved it|love it|so good|very good|too good|awesome|great food|perfect|best)\b|❤|😋|😍|👌|🤤|🔥/i;
@@ -356,15 +387,19 @@ var WA = (function () {
   /* ---------- the whole export ---------- */
   function parse(raw) {
     var msgs = toMessages(raw);
-    var orders = [], payments = [], reviews = [], menu = [], skipped = 0;
+    var orders = [], payments = [], reviews = [], menu = [], counter = [], skipped = 0;
 
     msgs.forEach(function (m) {
       var who = cleanName(m.sender);
       var fromAdmin = ADMINS.test(who);
 
-      /* a chef posting dishes with prices is the menu, not an order */
+      /* a chef's own post can also open or close her counter */
       if (fromAdmin && chefFor(who)) {
         var dishes = findMenu(m.text);
+        var state = findCounter(m.text);
+        /* a fresh menu is an invitation to order, unless the same post says otherwise */
+        if (!state && dishes.length) state = "open";
+        if (state) counter.push({ at: m.date, chef: chefFor(who), state: state, text: m.text.slice(0, 200) });
         if (dishes.length) {
           dishes.forEach(function (d) {
             menu.push({ at: m.date, chef: chefFor(who), name: d.name, price: d.price,
@@ -407,13 +442,13 @@ var WA = (function () {
       skipped++;
     });
 
-    return { orders: orders, payments: payments, reviews: reviews, menu: menu,
+    return { orders: orders, payments: payments, reviews: reviews, menu: menu, counter: counter,
              total: msgs.length, skipped: skipped };
   }
 
   return { parse: parse, parseLine: parseLine, toMessages: toMessages,
            findItems: findItems, findFlat: findFlat, findTower: findTower,
-           findMeal: findMeal, findPayment: findPayment, findMenu: findMenu,
+           findMeal: findMeal, findPayment: findPayment, findMenu: findMenu, findCounter: findCounter,
            cleanName: cleanName, chefFor: chefFor };
 })();
 
