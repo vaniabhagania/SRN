@@ -417,9 +417,14 @@ var WA = (function () {
     return { rating: praise ? 5 : 2, body: text.slice(0, 300) };
   }
 
+  function tagNeha(t) { return String(t || "").replace(/@\s*mom\b/gi, "@Neha"); }
+
   /* ---------- the whole export ---------- */
   function parse(raw) {
     var msgs = toMessages(raw);
+    /* In the group Neha is saved as "Mom". Anyone tagging her ("@Mom ji") is
+       tagging Neha, and that is how it should read wherever it is shown. */
+    msgs.forEach(function (m) { m.text = tagNeha(m.text); });
     var orders = [], payments = [], reviews = [], menu = [], counter = [], skipped = 0;
 
     msgs.forEach(function (m) {
@@ -481,7 +486,7 @@ var WA = (function () {
 
   return { parse: parse, parseLine: parseLine, toMessages: toMessages,
            findItems: findItems, findFlat: findFlat, findTower: findTower,
-           findMeal: findMeal, findPayment: findPayment, findMenu: findMenu, findCounter: findCounter, findItemClosure: findItemClosure,
+           findMeal: findMeal, findPayment: findPayment, findMenu: findMenu, findCounter: findCounter, findItemClosure: findItemClosure, tagNeha: tagNeha,
            cleanName: cleanName, chefFor: chefFor };
 })();
 
