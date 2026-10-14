@@ -37,7 +37,7 @@ var WA = (function () {
   /* Lines WhatsApp itself writes. */
   var SYSTEM = /(joined using this group's invite|added you|created group|changed the subject|changed this group's icon|messages and calls are end-to-end encrypted|security code changed|deleted this message|this message was deleted|<Media omitted>|image omitted|video omitted|sticker omitted|document omitted|null)/i;
 
-  var DISH_WORDS = /biryani|briyani|paratha|parantha|kebab|kabab|custard|puff|ladoo|laddoo|ghujiya|gujiya|radha\s*ballavi|kofta|phulka|pav|bhaji|tikki|ghugni|vada|paneer|halwa|mutton|chicken|gatte|sabzi|curry|roti|rice|dal|idli|dosa|poha|upma|samosa|cutlet|roll|thali|meal|plate/i;
+  var DISH_WORDS = /biryani|briyani|paratha|parantha|kebab|kabab|custard|puff|ladoo|laddoo|laddo|laddu|ladu|ghujiya|gujiya|radha\s*ballavi|kofta|phulka|pav|bhaji|tikki|ghugni|vada|paneer|halwa|mutton|chicken|gatte|sabzi|curry|roti|rice|dal|idli|dosa|poha|upma|samosa|cutlet|roll|thali|meal|plate/i;
 
   var MEALS = [
     { re: /\bbreakfast\b/i,            slot: "breakfast" },
@@ -113,7 +113,7 @@ var WA = (function () {
      Trailing 3-4 digits, "- 1174", "B-605", "For 1083 -", or "2012, 1 Chicken". */
   function findFlat(text) {
     var t = text.replace(/₹\s*[\d,]+/g, " ");           // drop money
-    t = t.replace(/\b\d{1,3}\s*(gm|gms|g|kg|ml|l)\b/gi, " ");// drop weights
+    t = t.replace(/\b\d{1,4}\s*(gm|gms|gram|grams|g|kg|ml|l)\b/gi, " ");// drop weights
     t = t.replace(/\b[ap]\.?m\.?\b/gi, " ");
 
     /* "B-605", "b 605", "B605" — a lone letter then the number */
@@ -187,7 +187,7 @@ var WA = (function () {
 
       var qty = 1;
       /* a leading number is a quantity unless it's a weight ("250 gm") */
-      var isWeight = /^\d{1,4}\s*(gm|gms|g|kg|ml|l)\b/i.test(part);
+      var isWeight = /^\d{1,4}\s*(gm|gms|gram|grams|g|kg|ml|l)\b/i.test(part);
       if (!isWeight) {
         var q = part.match(/^(\d+(?:\.\d+)?)\s*(?:x\s*)?/);
         if (q) { qty = parseFloat(q[1]); part = part.slice(q[0].length); }
@@ -199,7 +199,8 @@ var WA = (function () {
         .replace(/^\s*(plates?|nos?|pcs?|packets?)\s+(of\s+)?/i, "")
         .replace(/\s*(plates?|pcs?)\s*$/i, "")
         .replace(/[☀-➿️❤\u{1F300}-\u{1FAFF}]/gu, " ")  // emoji
-        .replace(/[.,;:–-]+\s*$/, "")                        // trailing punctuation
+        .replace(/\s+for\s*$/i, "")                              // "…500 gram for 1025"
+      .replace(/[.,;:–-]+\s*$/, "")                        // trailing punctuation
         .replace(/^\s*[.,;:–-]+/, "")
         .replace(/\s{2,}/g, " ")
         .trim();
@@ -223,6 +224,117 @@ var WA = (function () {
     return { amount: amt, confirmed: paid };
   }
 
+  /* ---------- menu posts ----------
+     A chef posting what's cooked, with a price:
+       "Atta Dryfruits Laddoo\n250gms for 250rs"
+       "Chicken Biryani - ₹180"
+       "Hara Bhara Kebab 6 pcs @ 150/-"
+     Returns [{ name, price, slot, diet }]. Only chefs' posts are read this
+     way; a customer typing "atta laddo 500 gram for 1025" is an order. */
+  var MENU_WORDS = new RegExp(DISH_WORDS.source +
+    "|pulao|pulav|khichdi|naan|sandwich|burger|pizza|pasta|noodles|manchurian|cake|brownie|cookies?|chaat|dhokla|kachori|jalebi|kheer|lassi|salad|soup|sweet|namkeen|chakli|murukku|mixture|pickle|chutney|combo|box", "i");
+  var NOT_A_DISH = /\b(pay|paid|payment|received|delivery\s+charges?|total|balance|upi|gpay|phonepe|collect|refund|sent to|advance|bill)\b/i;
+  var NONVEG = /chicken|mutton|fish|prawn|egg|keema|lamb|beef|pork|crab|seafood/i;
+  var PRICE_RES = [
+    /₹\s*(\d[\d,]*(?:\.\d+)?)/,
+    /\b(?:rs\.?|rupees|inr)\s*(\d[\d,]*(?:\.\d+)?)/i,
+    /(\d[\d,]*(?:\.\d+)?)\s*(?:rs\.?|rupees|inr|\/-|₹)(?!\w)/i,
+    /\bfor\s+(\d{2,5})\b(?!\s*(?:gm|gms|g|kg|ml|pcs?))/i
+  ];
+
+  function priceIn(line) {
+    for (var i = 0; i < PRICE_RES.length; i++) {
+      var m = line.match(PRICE_RES[i]);
+      if (m) {
+        var p = parseFloat(m[1].replace(/,/g, ""));
+        if (p >= 5 && p <= 20000) return { price: p, at: m.index };
+      }
+    }
+    /* "Chicken Biryani 180" — a bare 2-3 digit figure closing a line that
+       names a dish. Four digits would be a flat number, so those don't count. */
+    var b = line.match(/[a-z)]\s*[-–:@]?\s*(\d{2,3})\s*$/i);
+    if (b && MENU_WORDS.test(line) && !/\b(from|to|flat|tower)\b/i.test(line)) {
+      var bp = parseFloat(b[1]);
+      if (bp >= 20) return { price: bp, at: line.length - b[0].length + b[0].search(/\d/) };
+    }
+    return null;
+  }
+
+  function tidyDish(raw) {
+    var weight = "";
+    var w = raw.match(/(\d+(?:\.\d+)?)\s*(gms?|grams?|g|kg|ml|l|pcs?|pieces?|nos?)\b/i);
+    if (w) {
+      var u = w[2].toLowerCase();
+      u = /^g/.test(u) ? "g" : /^pc|^piece|^no/.test(u) ? "pcs" : u;
+      weight = w[1] + " " + u;
+      raw = raw.replace(w[0], " ");
+    }
+    var name = raw
+      .replace(/[☀-➿️❤\u{1F300}-\u{1FAFF}]/gu, " ")
+      .replace(/\b(price|cost|only|each|per|available|today|menu|special|new|pre-?book|pre-?order)\b\s*:?/gi, " ")
+      .replace(/^\s*(breakfast|lunch|dinner|supper)\b[\s:–—-]*/i, " ")
+      .replace(/[@:–—-]+\s*$/g, " ")
+      .replace(/\b(for|at|is|@)\s*$/i, " ")
+      .replace(/^[\s\-–—•*:.,]+|[\s\-–—•*:.,]+$/g, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+    if (name.length < 3 || !/[a-z]{3}/i.test(name)) return null;
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+    return { name: name, weight: weight };
+  }
+
+  function findMenu(text, atMeal) {
+    var out = [];
+    var body = String(text || "").replace(/\r/g, "");
+    if (!body.trim() || NOT_A_DISH.test(body) || QUESTION.test(body)) return out;
+
+    var lines = body.split(/\n+/);
+    /* a line holding several prices ("Biryani 180, Pulao 120") splits at commas */
+    var segs = [];
+    lines.forEach(function (ln) {
+      var parts = ln.split(/\s*[,;]\s*/);
+      if (parts.length > 1 && parts.filter(priceIn).length > 1) {
+        parts.forEach(function (x) { segs.push(x); });
+      } else {
+        segs.push(ln);
+      }
+    });
+
+    var carry = null;           // a name on the line above its price
+    segs.forEach(function (seg) {
+      seg = seg.trim();
+      if (!seg) return;
+      var p = priceIn(seg);
+      if (!p) {
+        carry = /[a-z]{3}/i.test(seg) && seg.length <= 70 ? seg : null;
+        return;
+      }
+      var left = seg.slice(0, p.at);
+      var nm = tidyDish(left);
+      if (!nm && carry) nm = tidyDish(carry + " " + left);   // keeps "250gms for"
+      if (!nm && !carry) {
+        /* "Chicken biryani for ₹180": name may also follow the price */
+        nm = tidyDish(seg.slice(p.at).replace(PRICE_RES[0], " "));
+      }
+      carry = null;
+      if (!nm) return;
+      /* an ordinary sentence with a figure in it is not a dish */
+      if (!DISH_WORDS.test(nm.name) && nm.name.split(/\s+/).length > 6) return;
+
+      var slot = "all";
+      var meal = atMeal || findMeal(body);
+      if (meal === "breakfast" || meal === "lunch" || meal === "dinner") slot = meal;
+
+      out.push({
+        name: nm.weight ? nm.name + " (" + nm.weight + ")" : nm.name,
+        price: p.price,
+        slot: slot,
+        diet: NONVEG.test(nm.name) ? "nonveg" : "veg"
+      });
+    });
+    return out;
+  }
+
   /* ---------- review ----------
      Only unmistakable praise or complaint, so the preview stays honest. */
   var PRAISE = /\b(delicious|yummy|tasty|amazing|excellent|lovely|superb|fantastic|wonderful|loved it|love it|so good|very good|too good|awesome|great food|perfect|best)\b|❤|😋|😍|👌|🤤|🔥/i;
@@ -244,11 +356,23 @@ var WA = (function () {
   /* ---------- the whole export ---------- */
   function parse(raw) {
     var msgs = toMessages(raw);
-    var orders = [], payments = [], reviews = [], skipped = 0;
+    var orders = [], payments = [], reviews = [], menu = [], skipped = 0;
 
     msgs.forEach(function (m) {
       var who = cleanName(m.sender);
       var fromAdmin = ADMINS.test(who);
+
+      /* a chef posting dishes with prices is the menu, not an order */
+      if (fromAdmin && chefFor(who)) {
+        var dishes = findMenu(m.text);
+        if (dishes.length) {
+          dishes.forEach(function (d) {
+            menu.push({ at: m.date, chef: chefFor(who), name: d.name, price: d.price,
+                        slot: d.slot, diet: d.diet, text: m.text.slice(0, 220) });
+          });
+          return;
+        }
+      }
 
       var pay = findPayment(m.text);
       if (pay && !fromAdmin) {
@@ -283,13 +407,13 @@ var WA = (function () {
       skipped++;
     });
 
-    return { orders: orders, payments: payments, reviews: reviews,
+    return { orders: orders, payments: payments, reviews: reviews, menu: menu,
              total: msgs.length, skipped: skipped };
   }
 
   return { parse: parse, parseLine: parseLine, toMessages: toMessages,
            findItems: findItems, findFlat: findFlat, findTower: findTower,
-           findMeal: findMeal, findPayment: findPayment,
+           findMeal: findMeal, findPayment: findPayment, findMenu: findMenu,
            cleanName: cleanName, chefFor: chefFor };
 })();
 

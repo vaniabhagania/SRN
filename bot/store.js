@@ -146,18 +146,33 @@ function priceItem(name) {
   return bestScore >= 0.6 ? best : null;
 }
 
+/* Grams in "500 gram", "250gms", "(250 g)", or null. Kilos count as 1000. */
+function gramsIn(s) {
+  const m = String(s || "").match(/(\d+(?:\.\d+)?)\s*(kg|gms?|grams?|g)\b/i);
+  if (!m) return null;
+  const n = parseFloat(m[1]);
+  return /^kg/i.test(m[2]) ? n * 1000 : n;
+}
+
 /* ---- writes ---- */
 async function saveOrder(parsed, fallbackChef) {
   await refreshMenu().catch(() => {});
   const items = parsed.items.map((it) => {
     const dish = priceItem(it.name);
     const price = dish ? Number(dish.price) : 0;
+    let qty = it.qty;
+
+    /* "500 gram" of something the menu sells as "(250 g)" is two of them */
+    if (dish) {
+      const asked = gramsIn(it.name), pack = gramsIn(dish.name);
+      if (asked && pack && asked > pack && asked % pack === 0) qty = (asked / pack) * it.qty;
+    }
     return {
       chef_id: dish ? dish.chef_id : fallbackChef,
       name: dish ? dish.name : it.name,
-      qty: it.qty,
+      qty,
       price,
-      amount: price * it.qty
+      amount: price * qty
     };
   });
   const grand = items.reduce((s, i) => s + i.amount, 0);
@@ -187,6 +202,34 @@ async function saveReview(r, chefId) {
   });
 }
 
+/* A dish a chef posted in the chat, waiting for her to confirm it.
+   msgKey makes this safe to repeat: the same post is only queued once. */
+async function savePendingDish(d, chefId, msgKey) {
+  if (cfg.DRY_RUN) {
+    console.log("  [dry run] would queue dish:", JSON.stringify({ ...d, chefId }));
+    return;
+  }
+  /* A plain insert, not an upsert: the security rules let a stranger add a
+     row but not read one, and an upsert needs to read. msg_key is unique, so
+     a post seen twice is refused with 409, which just means "already queued". */
+  const r = await fetch(REST + "pending_dishes", {
+    method: "POST",
+    headers: HEAD,
+    body: JSON.stringify({
+      chef_id: chefId,
+      name: d.name,
+      price: d.price,
+      slot: d.slot || "all",
+      diet: d.diet || "veg",
+      raw: d.text || "",
+      posted_at: d.at.toISOString(),
+      msg_key: msgKey
+    })
+  });
+  if (r.status === 409) return;             // already queued
+  if (!r.ok) throw new Error(`POST pending_dishes → ${r.status} ${await r.text()}`);
+}
+
 async function savePayment(p, chefId) {
   await post("pending_payments", {
     who: p.who,
@@ -198,4 +241,4 @@ async function savePayment(p, chefId) {
   });
 }
 
-module.exports = { saveOrder, saveReview, savePayment, refreshMenu, priceItem, near, squash };
+module.exports = { saveOrder, saveReview, savePayment, savePendingDish, refreshMenu, priceItem, gramsIn, near, squash };

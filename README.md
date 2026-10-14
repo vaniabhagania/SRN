@@ -139,3 +139,13 @@ Light and dark are both defined, and the button in the header switches them.
   button.
 - **Payments aren't tracked.** Each chef collects her own, as now. The app shows
   what is owed, not what has been received.
+
+## Menu posts from WhatsApp
+
+When a chef posts a dish with a price in the group ("Atta Dryfruits Laddoo
+250gms for 250rs"), the sync and the listener queue it in `pending_dishes`.
+It shows up as a card at the top of her **Dishes** tab, and **Add to menu**
+puts it live. It is a queue rather than a direct write because only a signed-in
+chef can write to `dishes` — that is what stops strangers posting to the menu.
+Run `schema.sql` again to create the table on an existing project; it is safe
+to re-run.

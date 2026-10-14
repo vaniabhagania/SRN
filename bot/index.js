@@ -121,7 +121,8 @@ async function handle(m, sock) {
   }
 
   /* Feed one line to the shared parser, in the shape an export uses. */
-  const line = `[${at.toLocaleTimeString("en-GB", { hour12: false })}, ${at.toLocaleDateString("en-GB")}] ${who}: ${body}`;
+  /* date first, then time — the order the parser reads */
+  const line = `[${at.toLocaleDateString("en-GB")}, ${at.toLocaleTimeString("en-GB", { hour12: false })}] ${who}: ${body}`;
   let res;
   try { res = WA.parse(line); }
   catch (e) { log("parse failed:", e.message); remember(id); return; }
@@ -138,8 +139,18 @@ async function handle(m, sock) {
       return;
     }
 
-    /* A chef's own message is a menu or an announcement, never an order. */
-    if (chefSender) return;
+    /* A chef's own message is a menu or an announcement, never an order.
+       When it names a dish and a price it is queued for her to put on the
+       menu with one tap — this listener has no login, so it cannot add
+       dishes itself. */
+    if (chefSender) {
+      for (const d of res.menu) {
+        const key = `${id}:${d.name}`.slice(0, 120);
+        await store.savePendingDish({ ...d, at }, chefSender, key);
+        log(`menu     ${group.name}  ${chefSender}  ${d.name}  ₹${d.price}`);
+      }
+      return;
+    }
 
     if (res.reviews.length) {
       for (const r of res.reviews) {

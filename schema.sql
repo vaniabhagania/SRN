@@ -90,6 +90,27 @@ create table if not exists pending_payments (
 );
 create index if not exists pending_open_idx on pending_payments(resolved, seen_at desc);
 
+-- ---------------------------------------------- dishes spotted in WhatsApp ----
+-- Same idea as pending_payments: when a chef posts "Atta Laddoo 250g for 250rs"
+-- in the group, the sync/listener has no login and cannot add a dish. It queues
+-- it here, and the chef adds it to the menu with one tap. msg_key makes the
+-- same post queue only once however many times it is seen.
+create table if not exists pending_dishes (
+  id        uuid primary key default gen_random_uuid(),
+  chef_id   text not null references chefs(id) on delete cascade,
+  name      text not null check (char_length(name) between 3 and 90),
+  price     numeric(10,2) not null check (price > 0 and price <= 20000),
+  slot      text not null default 'all'
+            check (slot in ('all','breakfast','lunch','dinner')),
+  diet      text not null default 'veg' check (diet in ('veg','nonveg')),
+  note      text default '' check (char_length(note) <= 160),
+  raw       text default '' check (char_length(raw) <= 400),
+  posted_at timestamptz not null default now(),
+  msg_key   text unique,
+  resolved  boolean not null default false
+);
+create index if not exists pending_dishes_open_idx on pending_dishes(resolved, posted_at desc);
+
 -- ----------------------------------------------- manually added earnings ----
 -- For days that were sold before the app existed, or cash taken outside it.
 create table if not exists manual_earnings (
@@ -114,6 +135,7 @@ alter table orders           enable row level security;
 alter table reviews          enable row level security;
 alter table manual_earnings  enable row level security;
 alter table pending_payments enable row level security;
+alter table pending_dishes   enable row level security;
 
 -- Is the caller the chef who owns this row?
 create or replace function is_chef(target text)
@@ -177,6 +199,22 @@ create policy pending_read_chefs on pending_payments for select
 drop policy if exists pending_update_chefs on pending_payments;
 create policy pending_update_chefs on pending_payments for update
   using (auth.uid() is not null) with check (auth.uid() is not null);
+
+-- pending dishes: anyone may queue one (the sync has no login) but only the
+-- chef it belongs to can see or clear it. Nothing here reaches the public menu
+-- until she adds it, and she is the only one who can write to dishes.
+drop policy if exists pdish_insert_any on pending_dishes;
+create policy pdish_insert_any on pending_dishes for insert with check (true);
+
+drop policy if exists pdish_read_own on pending_dishes;
+create policy pdish_read_own on pending_dishes for select using (is_chef(chef_id));
+
+drop policy if exists pdish_update_own on pending_dishes;
+create policy pdish_update_own on pending_dishes for update
+  using (is_chef(chef_id)) with check (is_chef(chef_id));
+
+grant insert on pending_dishes to anon, authenticated;
+grant select, update on pending_dishes to authenticated;
 
 -- ============================================================================
 -- Seed the roster

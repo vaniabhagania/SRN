@@ -197,15 +197,24 @@ sudo systemctl restart srn-listener
 | In the group | What happens |
 |---|---|
 | "1 chicken biryani for lunch - 2104" | Order, priced from the menu, on the matching chef's calendar |
-| "2 plate radha ballavi" from a chef | Ignored — chefs post menus, not orders |
+| "Atta Laddoo 250g for 250rs" from a chef | Queued under *Dishes* in her Chef tab as a card — one tap to add it to the menu |
+| Anything else from a chef | Ignored — chefs post menus and announcements, not orders |
 | "Is biryani available?" | Ignored — a question is not an order |
 | "the biryani was delicious ❤" | Review, 5 stars |
 | A WhatsApp payment, or "₹250 sent to Mom" | Lands in Payments for the chef to confirm with one tap |
-| A photo with no caption | Left alone — the hourly sync can read pictures, this cannot |
+| A photo with no caption | Left alone — the hourly sync can read pictures (a menu poster, a payment screenshot), this cannot |
 
 Dish names are matched loosely against the live menu, so "chicken briyani",
 "harabara kebab" and "250 gm fry fruit aata ladoo" all find the right dish.
 Anything it cannot match comes through at ₹0 for you to price in the app.
+
+Weights are understood: "500 gram" of a dish the menu sells as "(250 g)" is filed
+as two of them.
+
+A menu post never goes straight onto the public menu. The listener has no login
+and the security rules only let the chef write her own dishes, so it queues the
+dish in `pending_dishes` and the chef confirms. Nothing a stranger posts can
+reach the menu.
 
 An order it cannot price is still worth having — it has the customer, the flat
 and the items. You just fill in the amount.
