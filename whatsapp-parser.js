@@ -357,9 +357,42 @@ var WA = (function () {
   /* "orders will open tomorrow" is not open now */
   var NOT_YET = /\b(will|shall|tomorrow|tmrw|from\s+\d|after\s+\d|soon|later)\b[^.\n!]{0,20}\b(open|reopen|start|resume)/i;
 
+  /* "Orders for Pav bhaji is closed", "Laddoo orders are closed": she is
+     closing one dish, not the whole counter. These must not take her other
+     dishes off the menu, so findCounter ignores them and findItemClosure
+     reports which dish was meant. */
+  var GENERIC_WORD = /^(all|the|our|these|those|today'?s?|todays|tonight'?s?|tomorrow'?s?|lunch|dinner|breakfast|snacks?|new|further|more|any|regular|daily|today|tonight|tomorrow|now|this|next|the\s+day|delivery|pre-?bookings?|pre-?orders?|bookings?|orders?|food|kitchen|counter)$/i;
+  var ITEM_CLOSED = /\b(?:closed?|closing|over|full|finished|sold\s*out|ended)\b/i;
+  function findItemClosure(text) {
+    var t = String(text || "");
+    if (!t.trim() || QUESTION.test(t)) return null;
+    var out = [], m;
+    function add(raw) {
+      raw = String(raw || "").replace(/[^\w\s&,'\/-]/g, " ").replace(/\s+/g, " ").trim();
+      /* "laddoos and gujiya", "pav bhaji, vada pav" -> separate dishes */
+      raw.split(/\s*(?:,|&|\band\b|\/)\s*/i).forEach(function (w) {
+        w = w.trim();
+        if (w.length > 2 && !GENERIC_WORD.test(w) && out.indexOf(w.toLowerCase()) < 0) out.push(w.toLowerCase());
+      });
+    }
+    /* "Orders for X is/are closed" */
+    m = /\borders?\s+for\s+([a-z][^.\n!?]{2,50}?)\s+(?:is\s+|are\s+|has\s+|have\s+|been\s+|now\s+)*(?:closed?|over|full|finished|sold\s*out)\b/i.exec(t);
+    if (m) add(m[1]);
+    /* "X orders are closed" */
+    m = /\b([a-z][a-z' &,\/-]{2,40}?)\s+orders?\s+(?:are\s+|is\s+|have\s+been\s+|now\s+)*(?:closed?|over|full|finished|sold\s*out)\b/i.exec(t);
+    if (m) add(m[1]);
+    /* "Closing X orders for tomorrow's delivery" / "Closing orders for X and Y" */
+    m = /\bclosing\s+(?:the\s+)?([a-z][a-z' &,\/-]{2,40}?)\s+orders?\b/i.exec(t);
+    if (m) add(m[1]);
+    m = /\bclosing\s+(?:the\s+)?orders?\s+for\s+([a-z][^.\n!?]{2,50}?)(?=\s+(?:for|from|till|until|tomorrow|today)\b|[.\n!?]|$)/i.exec(t);
+    if (m) add(m[1]);
+    return out.length ? { state: "closed", items: out } : null;
+  }
+
   function findCounter(text) {
     var t = String(text || "");
     if (!t.trim() || QUESTION.test(t)) return null;
+    if (findItemClosure(t)) return null;
     for (var i = 0; i < CLOSED_RES.length; i++) if (CLOSED_RES[i].test(t)) return "closed";
     if (NOT_YET.test(t)) return null;
     for (var j = 0; j < OPEN_RES.length; j++) if (OPEN_RES[j].test(t)) return "open";
@@ -448,7 +481,7 @@ var WA = (function () {
 
   return { parse: parse, parseLine: parseLine, toMessages: toMessages,
            findItems: findItems, findFlat: findFlat, findTower: findTower,
-           findMeal: findMeal, findPayment: findPayment, findMenu: findMenu, findCounter: findCounter,
+           findMeal: findMeal, findPayment: findPayment, findMenu: findMenu, findCounter: findCounter, findItemClosure: findItemClosure,
            cleanName: cleanName, chefFor: chefFor };
 })();
 
