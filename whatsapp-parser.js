@@ -51,24 +51,45 @@ var WA = (function () {
        [07/10/2026, 1:34:02 pm] Vinita: 250gm
        07/10/2026, 13:34 - Vinita: 250gm
        7/10/26, 1:34 pm - Vinita: 250gm
+     ...and the TIME-FIRST header WhatsApp Web uses in
+     data-pre-plain-text, which both the live bot and the hourly
+     sync build their lines from:
+       [1:34 pm, 07/10/2026] Vinita: 250gm
+       [13:34:02, 07/10/2026] Vinita: 250gm
+     Both orderings must work: a line that only the other half
+     understands parses as nothing at all, and an order silently
+     disappears.
      Returns null for a continuation line (part of the message above). */
-  function parseLine(line) {
-    var m = line.match(
-      /^‎?\[?(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([ap]\.?m\.?)?\]?\s*[-–]?\s*([^:]{1,60}?):\s?([\s\S]*)$/i
-    );
-    if (!m) return null;
+  var DATE_FIRST = /^‎?\[?(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([ap]\.?m\.?)?\]?\s*[-–]?\s*([^:]{1,60}?):\s?([\s\S]*)$/i;
+  var TIME_FIRST = /^‎?\[?(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([ap]\.?m\.?)?,?\s+(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})\]?\s*[-–]?\s*([^:]{1,60}?):\s?([\s\S]*)$/i;
 
-    var day = +m[1], mon = +m[2], yr = +m[3];
+  function parseLine(line) {
+    var day, mon, yr, hh, mm, ss, ampm, sender, text;
+
+    /* date-first first: a date can't start with "12:" so the two
+       shapes never claim the same line. */
+    var m = line.match(DATE_FIRST);
+    if (m) {
+      day = +m[1]; mon = +m[2]; yr = +m[3];
+      hh = +m[4]; mm = +m[5]; ss = +(m[6] || 0);
+      ampm = m[7]; sender = m[8]; text = m[9];
+    } else {
+      m = line.match(TIME_FIRST);
+      if (!m) return null;
+      hh = +m[1]; mm = +m[2]; ss = +(m[3] || 0); ampm = m[4];
+      day = +m[5]; mon = +m[6]; yr = +m[7];
+      sender = m[8]; text = m[9];
+    }
+
     if (yr < 100) yr += 2000;
-    var hh = +m[4], mm = +m[5];
-    var ampm = (m[7] || "").toLowerCase().replace(/\./g, "");
+    ampm = (ampm || "").toLowerCase().replace(/\./g, "");
     if (ampm === "pm" && hh < 12) hh += 12;
     if (ampm === "am" && hh === 12) hh = 0;
 
     return {
-      date: new Date(yr, mon - 1, day, hh, mm, +(m[6] || 0)),
-      sender: m[8].trim(),
-      text: (m[9] || "").trim()
+      date: new Date(yr, mon - 1, day, hh, mm, ss),
+      sender: sender.trim(),
+      text: (text || "").trim()
     };
   }
 
