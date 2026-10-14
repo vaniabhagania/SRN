@@ -809,6 +809,9 @@ var WA = (function () {
     return CHEF_BY_CHAT_NAME[cleanName(rawName).toLowerCase()] || null;
   }
 
+  /* Offset of the chat's clock from UTC, in minutes. India: +05:30. */
+  var TZ_OFFSET_MIN = 330;
+
   /* Lines WhatsApp itself writes. */
   var SYSTEM = /(joined using this group's invite|added you|created group|changed the subject|changed this group's icon|messages and calls are end-to-end encrypted|security code changed|deleted this message|this message was deleted|<Media omitted>|image omitted|video omitted|sticker omitted|document omitted|null)/i;
 
@@ -861,8 +864,12 @@ var WA = (function () {
     if (ampm === "pm" && hh < 12) hh += 12;
     if (ampm === "am" && hh === 12) hh = 0;
 
+    /* Times in the chat are the kitchen's local time (IST). Build the real
+       instant from that, not from whatever zone this code happens to run in:
+       a cloud sandbox is UTC, and "8:35 pm" there would otherwise be filed
+       5½ hours late, which moves evening orders onto the next day. */
     return {
-      date: new Date(yr, mon - 1, day, hh, mm, ss),
+      date: new Date(Date.UTC(yr, mon - 1, day, hh, mm, ss) - TZ_OFFSET_MIN * 60000),
       sender: sender.trim(),
       text: (text || "").trim()
     };

@@ -122,7 +122,9 @@ async function handle(m, sock) {
 
   /* Feed one line to the shared parser, in the shape an export uses. */
   /* date first, then time — the order the parser reads */
-  const line = `[${at.toLocaleDateString("en-GB")}, ${at.toLocaleTimeString("en-GB", { hour12: false })}] ${who}: ${body}`;
+  /* the parser reads chat times as India time, whatever zone this server is in */
+  const IST = { timeZone: "Asia/Kolkata" };
+  const line = `[${at.toLocaleDateString("en-GB", IST)}, ${at.toLocaleTimeString("en-GB", { ...IST, hour12: false })}] ${who}: ${body}`;
   let res;
   try { res = WA.parse(line); }
   catch (e) { log("parse failed:", e.message); remember(id); return; }
